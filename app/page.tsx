@@ -92,7 +92,6 @@ export default function Home() {
                     <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
                       <li>Led the development of the SYNAPSE application, reducing manual data entry time by 60% using JavaScript, React.js, Node.js, Ruby on Rails, and Clojure.</li>
                       <li>Developed a modular UI design, reducing development time by 40% for new feature rollouts.</li>
-                      <li>Enhanced database indexing and query structuring, decreasing data retrieval latency from 1.5s to 500ms, ensuring 99.9% uptime.</li>
                     </ul>
                   </div>
                 </div>
@@ -109,7 +108,6 @@ export default function Home() {
                       <li>Designed and improved user interfaces for Sling TV using React.js, Redux Saga, RxJS, and TypeScript, reducing buffering issues.</li>
                       <li>Enhanced customer engagement by implementing real-time streaming optimizations, leading to a 20% increase in active viewing sessions.</li>
                       <li>Reduced page load times by 35%, improving video playback performance across web and smart TV applications.</li>
-                      <li>Led Agile development cycles, ensuring on-time feature delivery and reducing bug resolution time by 25%.</li>
                     </ul>
                   </div>
                 </div>
