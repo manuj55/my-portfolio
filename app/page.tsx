@@ -69,7 +69,7 @@ export default function Home() {
                   <div className="w-full">
                     <div className="flex flex-row justify-between items-baseline text-lg font-medium">
                       <div className="bg-blue-400 px-2 py-1 rounded-md text-white">Brandeis Consulting GmbH</div>
-                      <div className="ml-4 text-gray-700">(09/2024 – 03/2026)</div>
+                      <div className="ml-4 text-gray-700">(09/2024 – 04/2025)</div>
                     </div>
                     <p className="mt-2 font-medium  text-black">Software Developer (Working Student)</p>
                     <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
