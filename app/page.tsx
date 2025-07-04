@@ -6,7 +6,7 @@ export default function Home() {
       <Head>
         <title>Manu Janardhana | Portfolio</title>
         <meta name="description" content="Portfolio of Manu Janardhana, Full Stack Developer" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="shortcut icon" href="/favicon.ico" />
       </Head>
 
       <header className="fixed w-full bg-white shadow-md z-50">
@@ -64,11 +64,37 @@ export default function Home() {
             <div className="text-left w-full max-w-4xl px-8 ">
               <h2 className="text-4xl font-bold mb-12 text-center">Experience</h2>
               <div className="space-y-8">
-
                 <div className="relative p-8 rounded-3xl bg-white shadow-lg">
                   <div className="w-full">
                     <div className="flex flex-row justify-between items-baseline text-lg font-medium">
-                      <div className="bg-blue-400 px-2 py-1 rounded-md text-white">Brandeis Consulting GmbH</div>
+                      <a
+                        href="https://www.sap.com/germany/index.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-400 px-2 py-1 rounded-md text-white"
+                      >
+                        SAP, Walldorf Germany
+                      </a>
+                      <div className="ml-4 text-gray-700">(05/2025 – present)</div>
+                    </div>
+                    <p className="mt-2 font-medium  text-black">Full-Stack Developer (Working Student)</p>
+                    <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
+                      <li>Currently onboarding to the “Cloud Infrastructure Cockpit” team, gaining hands-on experience with SAP BTP, CI/CD pipelines, and cloud deployment processes.</li>
+                      <li>Updating and validating Jenkins server versions to meet internal security and compliance standards, while reviewing pipeline configurations and plugin compatibility to ensure seamless integration and stable deployments.</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="relative p-8 rounded-3xl bg-white shadow-lg">
+                  <div className="w-full">
+                    <div className="flex flex-row justify-between items-baseline text-lg font-medium">
+                      <a
+                        href="https://www.brandeis.de/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-400 px-2 py-1 rounded-md text-white"
+                      >
+                        Brandeis Consulting GmbH
+                      </a>
                       <div className="ml-4 text-gray-700">(09/2024 – 04/2025)</div>
                     </div>
                     <p className="mt-2 font-medium  text-black">Software Developer (Working Student)</p>
@@ -84,7 +110,14 @@ export default function Home() {
                 <div className="relative p-8 rounded-3xl bg-white shadow-lg mt-8">
                   <div className="w-full">
                     <div className="flex flex-row justify-between  items-baseline text-lg font-medium">
-                      <div className="bg-blue-400 px-2 py-1 rounded-md text-white">Oracle Health, Bangalore India</div>
+                      <a
+                        href="https://www.oracle.com/in/health/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-400 px-2 py-1 rounded-md text-white"
+                      >
+                        Oracle Health, Bangalore India
+                      </a>
                       <div className="ml-4 text-gray-700">(01/2022 – 03/2024)</div>
                     </div>
                     <p className="mt-2 font-medium  text-black">Full Stack Developer</p>
@@ -99,7 +132,14 @@ export default function Home() {
                 <div className="relative p-8 rounded-3xl bg-white shadow-lg mt-8">
                   <div className="w-full">
                     <div className="flex flex-row justify-between  items-baseline text-lg font-medium">
-                      <div className="bg-blue-400 px-2 py-1 rounded-md text-white">Openturf Technologies, Bangalore India</div>
+                      <a
+                        href="https://www.openturf.in/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-400 px-2 py-1 rounded-md text-white"
+                      >
+                        Openturf Technologies, Bangalore India
+                      </a>
                       <div className="ml-4 text-gray-700">(01/2020 – 01/2022)</div>
                     </div>
                     <p className="mt-2 font-medium  text-black">Front End Developer</p>
