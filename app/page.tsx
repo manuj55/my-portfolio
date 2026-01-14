@@ -36,7 +36,7 @@ export default function Home() {
         >
           <div className="text-center">
             <h2 className="text-5xl font-extrabold cursor-default">Manu Janardhana</h2>
-            <p className="mt-4 text-lg cursor-default">Full Stack Developer with 4 years of experience in e-commerce, OTT, and healthcare sectors.</p>
+            <p className="mt-4 text-lg cursor-default">Full Stack Developer with 5 years of experience in e-commerce, OTT, and healthcare sectors.</p>
           </div>
         </section>
 
@@ -48,7 +48,7 @@ export default function Home() {
             <div className="text-center w-1/2">
               <h2 className="text-4xl font-bold cursor-default">About Me</h2>
               <p className="mt-4 text-lg cursor-default">
-                Currently pursuing a Master’s in Applied Computer Science at SRH Heidelberg, with 4 years of experience in full-stack development
+                Currently pursuing a Master’s in Applied Computer Science at SRH Heidelberg, with 5 years of experience in full-stack development
                 across E-commerce, OTT platforms, and Healthcare. Optimized scalable systems, improving performance and reducing processing
                 time, while overcoming architectural and scalability challenges to drive business growth.
               </p>
@@ -79,8 +79,9 @@ export default function Home() {
                     </div>
                     <p className="mt-2 font-medium  text-black">Full-Stack Developer (Working Student)</p>
                     <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
-                      <li>Currently onboarding to the “Cloud Infrastructure Cockpit” team, gaining hands-on experience with SAP BTP, CI/CD pipelines, and cloud deployment processes.</li>
-                      <li>Updating and validating Jenkins server versions to meet internal security and compliance standards, while reviewing pipeline configurations and plugin compatibility to ensure seamless integration and stable deployments.</li>
+                      <li>Thesis project: Constructing Streamable HTTP MCP server consumed by LangChain agent with adapter for agentic API orchestration, transforming legacy app access into AI-ready unified experiences (70% UI reduction targeted).</li>
+                      <li>Piloted Joule AI proof-of-concept, onboarding Joule AI and developing AI agents tailored to internal use cases, driving innovation in cloud infrastructure automation.</li>
+                      <li>Enhanced test coverage for the "Cloud Infrastructure Cockpit" application (UI5, Java Script) by adding missing Jest test cases, aiming for 80% overall coverage.</li>
                     </ul>
                   </div>
                 </div>
@@ -99,10 +100,8 @@ export default function Home() {
                     </div>
                     <p className="mt-2 font-medium  text-black">Software Developer (Working Student)</p>
                     <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
-                      <li>Engineered a training portal using Gatsby, Strapi (Headless CMS), JavaScript, GraphQL, and REST APIs, reducing manual content updates by 80%.</li>
-                      <li>Developed an algorithm to parse JSON data and establish relational models in Strapi, automating data migration and improving efficiency by 60%.</li>
-                      <li>Introduced a freemium feature, boosting engagement by 35% and increasing lead conversion rates.</li>
-                      <li>Refined frontend validation processes, minimizing input errors by 40% and enhancing user experience.</li>
+                      <li>Engineered a training portal using Gatsby, Strapi (Headless CMS), JavaScript, GraphQL, and REST APIs, migrating an MDX-based content system into Strapi collections, reducing manual content updates by 80%.</li>
+                      <li>Devised an algorithm interpreting JSON data to build Strapi relational models, eliminating manual intervention, improving data loading times by 60% and reducing data errors to less than 5%.</li>
                     </ul>
                   </div>
                 </div>
@@ -123,8 +122,9 @@ export default function Home() {
                     <p className="mt-2 font-medium  text-black">Full Stack Developer</p>
                     <p className="mt-1 text-sm text-gray-600 italic">SYNAPSE (Health Care Domain)</p>
                     <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
-                      <li>Led the development of the SYNAPSE application, reducing manual data entry time by 60% using JavaScript, React.js, Node.js, Ruby on Rails, and Clojure.</li>
-                      <li>Developed a modular UI design, reducing development time by 40% for new feature rollouts.</li>
+                      <li>Led the development of the SYNAPSE application, integrating clinical workflows and automating patient data exchange, reducing manual data entry time by 60% using JavaScript, React.js, Node.js, Ruby on Rails, and Clojure.</li>
+                      <li>Developed a modular UI design, utilizing analytical insights and conceptual thinking to enable faster customization and reduce development time by 40% for new feature rollouts.</li>
+                      <li>Refined frontend validation processes, minimizing input errors by 40%, improving form interactions, and enhancing user experience.</li>
                     </ul>
                   </div>
                 </div>
@@ -145,9 +145,10 @@ export default function Home() {
                     <p className="mt-2 font-medium  text-black">Front End Developer</p>
                     <p className="mt-1 text-sm text-gray-600 italic">Sling Media (OTT Platform)</p>
                     <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
-                      <li>Designed and improved user interfaces for Sling TV using React.js, Redux Saga, RxJS, and TypeScript, reducing buffering issues.</li>
+                      <li>Implemented user interfaces for Sling TV leveraging React, Redux Saga, RxJS, and TypeScript, decreasing average API response time by 75ms which minimized buffering events by 18%.</li>
                       <li>Enhanced customer engagement by implementing real-time streaming optimizations, leading to a 20% increase in active viewing sessions.</li>
                       <li>Reduced page load times by 35%, improving video playback performance across web and smart TV applications.</li>
+                      <li>Led Agile development cycles, ensuring on-time feature delivery and reducing bug resolution time by 25% through efficient debugging and testing.</li>
                     </ul>
                   </div>
                 </div>
