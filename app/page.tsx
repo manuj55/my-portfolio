@@ -1,6 +1,11 @@
+'use client';
+
 import Head from 'next/head';
+import { useState } from 'react';
 
 export default function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen text-gray-900">
       <Head>
@@ -11,8 +16,25 @@ export default function Home() {
 
       <header className="fixed w-full bg-white shadow-md z-50">
         <div className="container mx-auto p-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold cursor-pointer">Manu Janardhana</h1>
-          <nav>
+          <h1 className="text-xl sm:text-2xl font-bold cursor-pointer">Manu Janardhana</h1>
+
+          {/* Mobile menu button */}
+          <button
+            className="md:hidden p-2 rounded-md hover:bg-gray-100"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {mobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+
+          {/* Desktop navigation */}
+          <nav className="hidden md:flex">
             <a href="#about" className="mx-4 text-gray-700 hover:text-black">
               About
             </a>
@@ -27,27 +49,47 @@ export default function Home() {
             </a>
           </nav>
         </div>
+
+        {/* Mobile navigation */}
+        {mobileMenuOpen && (
+          <nav className="md:hidden bg-white border-t border-gray-200 py-4">
+            <div className="flex flex-col items-center space-y-4">
+              <a href="#about" className="text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
+                About
+              </a>
+              <a href="#experience" className="text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
+                Experience
+              </a>
+              <a href="#projects" className="text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
+                Projects
+              </a>
+              <a href="#contact" className="text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
+                Contact
+              </a>
+            </div>
+          </nav>
+        )}
       </header>
 
       <main className="pt-16 bg-gradient-to-r from-green-400 to-teal-500">
         <section
           id="dev"
-          className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-b-3xl"
+          className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-b-3xl px-4 sm:px-8"
         >
           <div className="text-center">
-            <h2 className="text-5xl font-extrabold cursor-default">Manu Janardhana</h2>
-            <p className="mt-4 text-lg cursor-default">Full Stack Developer with 5 years of experience in e-commerce, OTT, and healthcare sectors.</p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold cursor-default">Manu Janardhana</h2>
+            <p className="mt-4 text-base sm:text-lg cursor-default max-w-2xl mx-auto">Full Stack Developer with 5 years of experience in e-commerce, OTT, and healthcare sectors.</p>
           </div>
         </section>
 
         <section
           id="about"
-          className='min-h-fit bg-gradient-to-r from-green-400 to-teal-500 text-white py-32'
+          className='min-h-fit bg-gradient-to-r from-green-400 to-teal-500 text-white py-16 sm:py-32 px-4 sm:px-8'
         >
-          <div className="min-h-fit flex items-center justify-center  my-36">
-            <div className="text-center w-1/2">
-              <h2 className="text-4xl font-bold cursor-default">About Me</h2>
-              <p className="mt-4 text-lg cursor-default">
+          <div className="min-h-fit flex items-center justify-center my-12 sm:my-36">
+            <div className="text-center w-full sm:w-3/4 lg:w-1/2">
+              <h2 className="text-3xl sm:text-4xl font-bold cursor-default">About Me</h2>
+              <p className="mt-4 text-base sm:text-lg cursor-default">
                 Currently pursuing a Master’s in Applied Computer Science at SRH Heidelberg, with 5 years of experience in full-stack development
                 across E-commerce, OTT platforms, and Healthcare. Optimized scalable systems, improving performance and reducing processing
                 time, while overcoming architectural and scalability challenges to drive business growth.
@@ -57,25 +99,25 @@ export default function Home() {
         </section>
         <section
           id="experience"
-          className='min-h-fit bg-gradient-to-r from-orange-400 to-red-500 py-32 cursor-default'>
+          className='min-h-fit bg-gradient-to-r from-orange-400 to-red-500 py-16 sm:py-32 cursor-default'>
           <div
-            className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r text-white  px-5 py-5"
+            className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r text-white px-4 sm:px-5 py-5"
           >
-            <div className="text-left w-full max-w-4xl px-8 ">
-              <h2 className="text-4xl font-bold mb-12 text-center">Experience</h2>
-              <div className="space-y-8">
-                <div className="relative p-8 rounded-3xl bg-white shadow-lg">
+            <div className="text-left w-full max-w-4xl px-4 sm:px-8">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-8 sm:mb-12 text-center">Experience</h2>
+              <div className="space-y-6 sm:space-y-8">
+                <div className="relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg">
                   <div className="w-full">
-                    <div className="flex flex-row justify-between items-baseline text-lg font-medium">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline text-base sm:text-lg font-medium gap-2">
                       <a
                         href="https://www.sap.com/germany/index.html"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-blue-400 px-2 py-1 rounded-md text-white"
+                        className="bg-blue-400 px-2 py-1 rounded-md text-white text-sm sm:text-base w-fit"
                       >
                         SAP, Walldorf Germany
                       </a>
-                      <div className="ml-4 text-gray-700">(05/2025 – present)</div>
+                      <div className="text-gray-700 text-sm sm:text-base">(05/2025 – present)</div>
                     </div>
                     <p className="mt-2 font-medium  text-black">Full-Stack Developer (Working Student)</p>
                     <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
@@ -85,18 +127,18 @@ export default function Home() {
                     </ul>
                   </div>
                 </div>
-                <div className="relative p-8 rounded-3xl bg-white shadow-lg">
+                <div className="relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg">
                   <div className="w-full">
-                    <div className="flex flex-row justify-between items-baseline text-lg font-medium">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline text-base sm:text-lg font-medium gap-2">
                       <a
                         href="https://www.brandeis.de/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-blue-400 px-2 py-1 rounded-md text-white"
+                        className="bg-blue-400 px-2 py-1 rounded-md text-white text-sm sm:text-base w-fit"
                       >
                         Brandeis Consulting GmbH
                       </a>
-                      <div className="ml-4 text-gray-700">(09/2024 – 04/2025)</div>
+                      <div className="text-gray-700 text-sm sm:text-base">(09/2024 – 04/2025)</div>
                     </div>
                     <p className="mt-2 font-medium  text-black">Software Developer (Working Student)</p>
                     <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
@@ -106,18 +148,18 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="relative p-8 rounded-3xl bg-white shadow-lg mt-8">
+                <div className="relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg mt-6 sm:mt-8">
                   <div className="w-full">
-                    <div className="flex flex-row justify-between  items-baseline text-lg font-medium">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline text-base sm:text-lg font-medium gap-2">
                       <a
                         href="https://www.oracle.com/in/health/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-blue-400 px-2 py-1 rounded-md text-white"
+                        className="bg-blue-400 px-2 py-1 rounded-md text-white text-sm sm:text-base w-fit"
                       >
                         Oracle Health, Bangalore India
                       </a>
-                      <div className="ml-4 text-gray-700">(01/2022 – 03/2024)</div>
+                      <div className="text-gray-700 text-sm sm:text-base">(01/2022 – 03/2024)</div>
                     </div>
                     <p className="mt-2 font-medium  text-black">Full Stack Developer</p>
                     <p className="mt-1 text-sm text-gray-600 italic">SYNAPSE (Health Care Domain)</p>
@@ -129,18 +171,18 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="relative p-8 rounded-3xl bg-white shadow-lg mt-8">
+                <div className="relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg mt-6 sm:mt-8">
                   <div className="w-full">
-                    <div className="flex flex-row justify-between  items-baseline text-lg font-medium">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline text-base sm:text-lg font-medium gap-2">
                       <a
                         href="https://www.openturf.in/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-blue-400 px-2 py-1 rounded-md text-white"
+                        className="bg-blue-400 px-2 py-1 rounded-md text-white text-sm sm:text-base w-fit"
                       >
                         Openturf Technologies, Bangalore India
                       </a>
-                      <div className="ml-4 text-gray-700">(01/2020 – 01/2022)</div>
+                      <div className="text-gray-700 text-sm sm:text-base">(01/2020 – 01/2022)</div>
                     </div>
                     <p className="mt-2 font-medium  text-black">Front End Developer</p>
                     <p className="mt-1 text-sm text-gray-600 italic">Sling Media (OTT Platform)</p>
@@ -159,13 +201,13 @@ export default function Home() {
 
         <section
           id="projects"
-          className="min-h-screen flex items-center justify-center bg-gray-100 rounded-b-3xl cursor-default"
+          className="min-h-screen flex items-center justify-center bg-gray-100 rounded-b-3xl cursor-default px-4 sm:px-8 py-16 sm:py-24"
         >
-          <div className="text-center max-w-6xl mx-auto">
-            <h2 className="text-4xl font-bold mb-12">Projects</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="text-center max-w-6xl mx-auto w-full">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-8 sm:mb-12">Projects</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
               {/* PantryPal Microservices Development */}
-              <div className="relative p-8 rounded-3xl bg-white shadow-lg transition-transform transform hover:scale-105 hover:bg-blue-100">
+              <div className="relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg transition-transform transform hover:scale-105 hover:bg-blue-100">
                 <div className="flex flex-col justify-between items-center">
                   <p className="text-lg font-medium">PantryPal Microservices Development</p>
                   <p className="mt-4 text-sm text-gray-600 text-justify">
@@ -186,7 +228,7 @@ export default function Home() {
               </div>
 
               {/* CampusCash Expense Manager Development */}
-              <div className="relative p-8 rounded-3xl bg-white shadow-lg transition-transform transform hover:scale-105 hover:bg-blue-100">
+              <div className="relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg transition-transform transform hover:scale-105 hover:bg-blue-100">
                 <div className="flex flex-col justify-between items-center h-full">
                   <p className="text-lg font-medium">CampusCash Expense Manager Development</p>
                   <p className="mt-4 text-sm text-gray-600 text-justify">
@@ -205,7 +247,7 @@ export default function Home() {
               </div>
 
               {/* Integrated Property Management System (PMS) Development */}
-              <div className="relative p-8 rounded-3xl bg-white shadow-lg transition-transform transform hover:scale-105 hover:bg-blue-100">
+              <div className="relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg transition-transform transform hover:scale-105 hover:bg-blue-100">
                 <div className="flex flex-col justify-between items-center h-full">
                   <p className="text-lg font-medium">Integrated Property Management System (PMS) Development</p>
                   <p className="mt-4 text-sm text-gray-600 text-justify">
@@ -224,7 +266,7 @@ export default function Home() {
               </div>
 
               {/* Comprehensive UI/UX Solution for E-commerce Platform */}
-              <div className="relative p-8 rounded-3xl bg-white shadow-lg transition-transform transform hover:scale-105 hover:bg-blue-100">
+              <div className="relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg transition-transform transform hover:scale-105 hover:bg-blue-100">
                 <div className="flex flex-col justify-between items-center h-full">
                   <p className="text-lg font-medium">Comprehensive UI/UX Solution for E-commerce Platform</p>
                   <p className="mt-4 text-sm text-gray-600 text-justify">
@@ -252,11 +294,20 @@ export default function Home() {
 
         <section
           id="contact"
-          className="min-h-screen flex items-center justify-center bg-gradient-to-r from-teal-400 to-blue-500 text-white rounded-t-3xl cursor-default"
+          className="min-h-screen flex items-center justify-center bg-gradient-to-r from-teal-400 to-blue-500 text-white rounded-t-3xl cursor-default px-4 sm:px-8"
         >
-          <div className="text-center">
-            <h2 className="text-4xl font-bold">Contact</h2>
-            <p className="mt-4 text-lg cursor-default">Feel free to reach out to me at <a href="mailto:manujanardhana55@gmail.com" className="underline">manujanardhana55@gmail.com</a> or connect with me on <a href="https://www.linkedin.com/in/manu-janardhana/" className="underline">LinkedIn</a> || <a href="https://github.com/manuj55" className="underline">Github</a>.</p>
+          <div className="text-center max-w-2xl">
+            <h2 className="text-3xl sm:text-4xl font-bold">Contact</h2>
+            <p className="mt-4 text-base sm:text-lg cursor-default">
+              Feel free to reach out to me at{' '}
+              <a href="mailto:manujanardhana55@gmail.com" className="underline break-all sm:break-normal">manujanardhana55@gmail.com</a>
+            </p>
+            <p className="mt-2 text-base sm:text-lg">
+              Connect with me on{' '}
+              <a href="https://www.linkedin.com/in/manu-janardhana/" className="underline">LinkedIn</a>
+              {' '}|{' '}
+              <a href="https://github.com/manuj55" className="underline">Github</a>
+            </p>
           </div>
         </section>
       </main>
