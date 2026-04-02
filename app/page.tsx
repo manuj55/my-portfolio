@@ -116,7 +116,7 @@ export default function Home() {
             <div className="text-center w-full sm:w-3/4 lg:w-1/2">
               <h2 className="text-3xl sm:text-4xl font-bold cursor-default">About Me</h2>
               <p className="mt-4 text-base sm:text-lg cursor-default">
-                Currently pursuing a Master’s in Applied Computer Science at SRH Heidelberg, with 5 years of experience in full-stack development
+                Master's graduate in Applied Computer Science from SRH Heidelberg, with 5 years of experience in full-stack development
                 across E-commerce, OTT platforms, and Healthcare. Optimized scalable systems, improving performance and reducing processing
                 time, while overcoming architectural and scalability challenges to drive business growth.
               </p>
