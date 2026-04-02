@@ -342,7 +342,7 @@ export default function Home() {
       </main>
 
       <footer className="py-8 bg-white text-center">
-        <p className="text-gray-600 cursor-progress">&copy; 2025 Manu Janardhana</p>
+        <p className="text-gray-600 cursor-progress">&copy; 2026 Manu Janardhana</p>
       </footer>
     </div>
   );
