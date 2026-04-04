@@ -103,7 +103,7 @@ export default function Home() {
         >
           <div className={`text-center transition-all duration-700 ease-out ${hero.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold cursor-default">Manu Janardhana</h2>
-            <p className="mt-4 text-base sm:text-lg cursor-default max-w-2xl mx-auto">Full Stack Developer with 5 years of experience in e-commerce, OTT, and healthcare sectors.</p>
+            <p className="mt-4 text-base sm:text-lg cursor-default max-w-2xl mx-auto">Senior Developer with 6 years of experience in e-commerce, OTT, and healthcare sectors.</p>
           </div>
         </section>
 
@@ -116,7 +116,7 @@ export default function Home() {
             <div className="text-center w-full sm:w-3/4 lg:w-1/2">
               <h2 className="text-3xl sm:text-4xl font-bold cursor-default">About Me</h2>
               <p className="mt-4 text-base sm:text-lg cursor-default">
-                Master's graduate in Applied Computer Science from SRH Heidelberg, with 5 years of experience in full-stack development
+                Master's graduate in Applied Computer Science from SRH Heidelberg, with 6 years of experience in full-stack development
                 across E-commerce, OTT platforms, and Healthcare. Optimized scalable systems, improving performance and reducing processing
                 time, while overcoming architectural and scalability challenges to drive business growth.
               </p>
