@@ -1,348 +1,588 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
-function useInView(threshold = 0.15) {
+// ─── Intersection Observer Hook ───────────────────────────────────────────────
+function useInView(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(el);
-        }
-      },
+      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.unobserve(el); } },
       { threshold }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, [threshold]);
-
   return { ref, isVisible };
 }
 
+// ─── Typing Effect Hook ───────────────────────────────────────────────────────
+function useTypingEffect(text: string, speed = 45, startDelay = 0) {
+  const [displayed, setDisplayed] = useState('');
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    setDisplayed('');
+    setDone(false);
+    let i = 0;
+    const timeout = setTimeout(() => {
+      const interval = setInterval(() => {
+        i++;
+        setDisplayed(text.slice(0, i));
+        if (i >= text.length) { clearInterval(interval); setDone(true); }
+      }, speed);
+      return () => clearInterval(interval);
+    }, startDelay);
+    return () => clearTimeout(timeout);
+  }, [text, speed, startDelay]);
+  return { displayed, done };
+}
+
+// ─── Matrix Rain Background ───────────────────────────────────────────────────
+function MatrixRain() {
+  const columns = useMemo(() => {
+    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+    return Array.from({ length: 24 }, (_, i) => ({
+      id: i,
+      left: `${(i / 24) * 100}%`,
+      duration: `${8 + (i % 7) * 2}s`,
+      delay: `${-(i * 0.7)}s`,
+      text: Array.from({ length: 30 }, () => chars[Math.floor(Math.random() * chars.length)]).join('\n'),
+    }));
+  }, []);
+
+  return (
+    <div className="matrix-bg" aria-hidden="true">
+      {columns.map(col => (
+        <div
+          key={col.id}
+          className="matrix-column"
+          style={{ left: col.left, animationDuration: col.duration, animationDelay: col.delay }}
+        >
+          {col.text}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Terminal Window Wrapper ──────────────────────────────────────────────────
+function TerminalWindow({ title, children, className = '' }: { title: string; children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`terminal-window ${className}`}>
+      <div className="terminal-title-bar">
+        <span className="terminal-dot red" />
+        <span className="terminal-dot yellow" />
+        <span className="terminal-dot green" />
+        <span className="terminal-title-text">{title}</span>
+      </div>
+      <div className="p-5 sm:p-6">{children}</div>
+    </div>
+  );
+}
+
+// ─── Skill Bar ────────────────────────────────────────────────────────────────
+function SkillBar({ name, pct, delay = 0, visible }: { name: string; pct: number; delay?: number; visible: boolean }) {
+  const [animPct, setAnimPct] = useState(0);
+  useEffect(() => {
+    if (!visible) return;
+    const t = setTimeout(() => setAnimPct(pct), delay);
+    return () => clearTimeout(t);
+  }, [visible, pct, delay]);
+
+  const filled = Math.round((animPct / 100) * 20);
+  const empty = 20 - filled;
+  return (
+    <div className="skill-bar-track flex items-center gap-3 text-xs sm:text-sm font-mono">
+      <span className="text-terminal-comment w-28 sm:w-36 shrink-0">{name}</span>
+      <span className="text-terminal-green">
+        {'█'.repeat(filled)}
+        <span style={{ color: 'rgba(0,255,65,0.12)' }}>{'░'.repeat(empty)}</span>
+      </span>
+      <span className="text-terminal-amber ml-1">{animPct}%</span>
+    </div>
+  );
+}
+
+// ─── Blinking Cursor ──────────────────────────────────────────────────────────
+function Cursor() {
+  return <span className="animate-blink text-terminal-green ml-0.5">█</span>;
+}
+
+// ─── Prompt Line ─────────────────────────────────────────────────────────────
+function Prompt({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-2 text-sm sm:text-base">
+      <span className="text-terminal-green shrink-0">manu@portfolio:~$</span>
+      <span className="text-terminal-cyan">{children}</span>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const hero = useInView();
-  const about = useInView();
+  const hero = useInView(0.05);
+  const about = useInView(0.1);
   const experience = useInView(0.05);
   const projects = useInView(0.05);
-  const contact = useInView();
+  const skills = useInView(0.1);
+  const contact = useInView(0.1);
 
   const email = ['manujanardhana55', 'gmail.com'].join('@');
 
+  const line1 = useTypingEffect('Hello, World. I\'m Manu Janardhana.', 50, 300);
+  const line2 = useTypingEffect('Senior Full-Stack Developer', 45, line1.done ? 200 : 99999);
+  const line3 = useTypingEffect('6+ years · E-commerce · OTT · Healthcare', 30, line2.done ? 200 : 99999);
+
+  const SKILLS = [
+    { name: 'React.js / Vue.js', pct: 95 },
+    { name: 'TypeScript', pct: 90 },
+    { name: 'JavaScript', pct: 95 },
+    { name: 'Node.js', pct: 85 },
+    { name: 'HTML / CSS', pct: 92 },
+    { name: 'GraphQL', pct: 80 },
+    { name: 'Ruby on Rails', pct: 75 },
+    { name: 'Docker', pct: 72 },
+    { name: 'Git', pct: 90 },
+  ];
+
+  const EXPERIENCE = [
+    {
+      company: 'SAP, Walldorf Germany',
+      href: 'https://www.sap.com/germany/index.html',
+      period: '05/2025 – 03/2026',
+      role: 'Full-Stack Developer (Working Student)',
+      project: null,
+      bullets: [
+        'Thesis project: Constructing Streamable HTTP MCP server consumed by LangChain agent with adapter for agentic API orchestration, transforming legacy app access into AI-ready unified experiences (70% UI reduction targeted).',
+        'Piloted Joule AI proof-of-concept, onboarding Joule AI and developing AI agents tailored to internal use cases, driving innovation in cloud infrastructure automation.',
+        'Enhanced test coverage for the "Cloud Infrastructure Cockpit" application (UI5, JavaScript) by adding missing Jest test cases, aiming for 80% overall coverage.',
+      ],
+    },
+    {
+      company: 'Brandeis Consulting GmbH',
+      href: 'https://www.brandeis.de/',
+      period: '09/2024 – 04/2025',
+      role: 'Software Developer (Working Student)',
+      project: null,
+      bullets: [
+        'Engineered a training portal using Gatsby, Strapi (Headless CMS), JavaScript, GraphQL, and REST APIs, migrating an MDX-based content system into Strapi collections, reducing manual content updates by 80%.',
+        'Devised an algorithm interpreting JSON data to build Strapi relational models, eliminating manual intervention, improving data loading times by 60% and reducing data errors to less than 5%.',
+      ],
+    },
+    {
+      company: 'Oracle Health, Bangalore India',
+      href: 'https://www.oracle.com/in/health/',
+      period: '01/2022 – 03/2024',
+      role: 'Full Stack Developer',
+      project: 'SYNAPSE (Health Care Domain)',
+      bullets: [
+        'Led the development of the SYNAPSE application, integrating clinical workflows and automating patient data exchange, reducing manual data entry time by 60% using JavaScript, React.js, Node.js, Ruby on Rails, and Clojure.',
+        'Developed a modular UI design, utilizing analytical insights and conceptual thinking to enable faster customization and reduce development time by 40% for new feature rollouts.',
+        'Refined frontend validation processes, minimizing input errors by 40%, improving form interactions, and enhancing user experience.',
+      ],
+    },
+    {
+      company: 'Openturf Technologies, Bangalore India',
+      href: 'https://www.openturf.in/',
+      period: '01/2020 – 01/2022',
+      role: 'Front End Developer',
+      project: 'Sling Media (OTT Platform)',
+      bullets: [
+        'Implemented user interfaces for Sling TV leveraging React, Redux Saga, RxJS, and TypeScript, decreasing average API response time by 75ms which minimized buffering events by 18%.',
+        'Enhanced customer engagement by implementing real-time streaming optimizations, leading to a 20% increase in active viewing sessions.',
+        'Reduced page load times by 35%, improving video playback performance across web and smart TV applications.',
+        'Led Agile development cycles, ensuring on-time feature delivery and reducing bug resolution time by 25% through efficient debugging and testing.',
+      ],
+    },
+  ];
+
+  const PROJECTS = [
+    {
+      title: 'PantryPal Microservices',
+      filename: 'pantry-pal.ts',
+      date: 'Jan 2025',
+      tags: ['Node.js', 'Vue.js', 'Docker', 'JWT', 'Swagger'],
+      description:
+        'Built a microservice-based grocery application using Node.js for authentication and user management. Implemented secure JWT-based authentication, user CRUD operations, Elastic search logger, rate limiter, and API documentation with Swagger. Dockerized all services on the same network.',
+    },
+    {
+      title: 'CampusCash Expense Manager',
+      filename: 'campus-cash.vue',
+      date: 'Dec 2024',
+      tags: ['Vue.js', 'JavaScript', 'CSS'],
+      description:
+        'Built an expense management app with advanced expense editing, splitting, validation, daily streak tracking to boost engagement, and secure authentication with integrated search and filter functionalities.',
+    },
+    {
+      title: 'Property Management System',
+      filename: 'pms.java',
+      date: 'Jun 2024',
+      tags: ['Java', 'JSP', 'MySQL', 'JDBC'],
+      description:
+        'Implemented a hotel management system using HTML, CSS, JavaScript, JSP, Java Servlets, JDBC, and MySQL. Features include admin and customer functionalities like account management, reservations, and surge pricing.',
+    },
+    {
+      title: 'E-commerce UI/UX Solution',
+      filename: 'ecommerce-ui.tsx',
+      date: 'Oct 2024',
+      tags: ['JavaScript', 'Tailwind', 'Material Design'],
+      description:
+        'Created a responsive landing page, store page, and about-us page for a trekking tools brand using JavaScript, Tailwind, Material Design, custom fonts, icons, and images.',
+    },
+  ];
+
+  const navLinks = [
+    { href: '#about', label: 'cd /about' },
+    { href: '#experience', label: 'cd /experience' },
+    { href: '#projects', label: 'cd /projects' },
+    { href: '#skills', label: 'cd /skills' },
+    { href: '#contact', label: 'cd /contact' },
+  ];
+
   return (
-    <div className="min-h-screen text-gray-900">
-      <header className="fixed w-full bg-white shadow-md z-50">
-        <div className="container mx-auto p-4 flex justify-between items-center">
-          <h1 className="text-xl sm:text-2xl font-bold cursor-pointer">Manu Janardhana</h1>
+    <div className="min-h-screen bg-terminal-bg text-terminal-green font-mono relative">
+      <MatrixRain />
+
+      {/* ── Header ── */}
+      <header className="fixed w-full z-50 border-b border-terminal-border bg-terminal-bg/90 backdrop-blur-md">
+        <div className="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span className="text-terminal-comment text-sm hidden sm:inline">~</span>
+            <h1 className="text-sm sm:text-base font-semibold text-terminal-green glitch">
+              manu<span className="text-terminal-cyan">@</span>portfolio
+            </h1>
+            <Cursor />
+          </div>
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
+            id="mobile-menu-button"
+            className="md:hidden p-2 border border-terminal-border hover:border-terminal-green transition-colors duration-200 text-terminal-green"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {mobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
+            <span className="text-xs">{mobileMenuOpen ? '[×]' : '[≡]'}</span>
           </button>
 
-          {/* Desktop navigation */}
-          <nav className="hidden md:flex">
-            <a href="#about" className="mx-4 text-gray-700 hover:text-black transition-colors duration-200">
-              About
-            </a>
-            <a href="#experience" className="mx-4 text-gray-700 hover:text-black transition-colors duration-200">
-              Experience
-            </a>
-            <a href="#projects" className="mx-4 text-gray-700 hover:text-black transition-colors duration-200">
-              Projects
-            </a>
-            <a href="#contact" className="mx-4 text-gray-700 hover:text-black transition-colors duration-200">
-              Contact
-            </a>
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
+            {navLinks.map(link => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="px-3 py-1.5 text-xs text-terminal-comment hover:text-terminal-green hover:bg-terminal-border/50 transition-all duration-200 border border-transparent hover:border-terminal-border"
+              >
+                <span className="text-terminal-green">$ </span>{link.label}
+              </a>
+            ))}
           </nav>
         </div>
 
-        {/* Mobile navigation */}
+        {/* Mobile nav */}
         {mobileMenuOpen && (
-          <nav className="md:hidden bg-white border-t border-gray-200 py-4">
-            <div className="flex flex-col items-center space-y-4">
-              <a href="#about" className="text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
-                About
-              </a>
-              <a href="#experience" className="text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
-                Experience
-              </a>
-              <a href="#projects" className="text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
-                Projects
-              </a>
-              <a href="#contact" className="text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
-                Contact
-              </a>
+          <nav className="md:hidden border-t border-terminal-border bg-terminal-bg/95" aria-label="Mobile navigation">
+            <div className="flex flex-col py-3">
+              {navLinks.map(link => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="px-6 py-2.5 text-sm text-terminal-comment hover:text-terminal-green hover:bg-terminal-border/40 transition-all duration-150"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="text-terminal-green">$ </span>{link.label}
+                </a>
+              ))}
             </div>
           </nav>
         )}
       </header>
 
-      <main className="pt-16 bg-gradient-to-r from-green-400 to-teal-500">
+      <main className="relative z-10 pt-16">
+
+        {/* ── Hero ── */}
         <section
           id="dev"
           ref={hero.ref}
-          className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-b-3xl px-4 sm:px-8"
+          className="min-h-screen flex items-center justify-center px-4 sm:px-8 py-20"
         >
-          <div className={`text-center transition-all duration-700 ease-out ${hero.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold cursor-default">Manu Janardhana</h2>
-            <p className="mt-4 text-base sm:text-lg cursor-default max-w-2xl mx-auto">Senior Developer with 6 years of experience in e-commerce, OTT, and healthcare sectors.</p>
+          <div className={`w-full max-w-3xl transition-all duration-700 ease-out ${hero.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <TerminalWindow title="~/portfolio — bash — 120×40">
+              <div className="space-y-4 min-h-[180px] sm:min-h-[200px]">
+                <Prompt>whoami</Prompt>
+                <div className="pl-4 sm:pl-6 space-y-2 text-sm sm:text-base">
+                  <p className="text-terminal-green text-glow-green text-xl sm:text-2xl md:text-3xl font-semibold">
+                    {line1.displayed}{!line1.done && <Cursor />}
+                  </p>
+                  {line1.done && (
+                    <p className="text-terminal-cyan text-lg sm:text-xl">
+                      <span className="text-terminal-amber">role: </span>
+                      {line2.displayed}{!line2.done && <Cursor />}
+                    </p>
+                  )}
+                  {line2.done && (
+                    <p className="text-terminal-comment text-sm sm:text-base">
+                      <span className="text-terminal-amber">exp:  </span>
+                      {line3.displayed}{!line3.done && <Cursor />}
+                    </p>
+                  )}
+                </div>
+                {line3.done && (
+                  <div className="pt-4 border-t border-terminal-border space-y-1 text-xs sm:text-sm text-terminal-comment">
+                    <Prompt>ls ./links</Prompt>
+                    <div className="pl-4 sm:pl-6 flex flex-wrap gap-4">
+                      <a href="#about" className="terminal-link">about.md</a>
+                      <a href="#experience" className="terminal-link">experience.log</a>
+                      <a href="#projects" className="terminal-link">projects/</a>
+                      <a href="#skills" className="terminal-link">skills.json</a>
+                      <a href="#contact" className="terminal-link">contact.sh</a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </TerminalWindow>
           </div>
         </section>
 
+        {/* ── About ── */}
         <section
           id="about"
           ref={about.ref}
-          className='min-h-fit bg-gradient-to-r from-green-400 to-teal-500 text-white py-16 sm:py-32 px-4 sm:px-8'
+          className="py-20 sm:py-28 px-4 sm:px-8"
         >
-          <div className={`min-h-fit flex items-center justify-center my-12 sm:my-36 transition-all duration-700 ease-out ${about.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="text-center w-full sm:w-3/4 lg:w-1/2">
-              <h2 className="text-3xl sm:text-4xl font-bold cursor-default">About Me</h2>
-              <p className="mt-4 text-base sm:text-lg cursor-default">
-                Master's graduate in Applied Computer Science from SRH Heidelberg, with 6 years of experience in full-stack development
-                across E-commerce, OTT platforms, and Healthcare. Optimized scalable systems, improving performance and reducing processing
-                time, while overcoming architectural and scalability challenges to drive business growth.
-              </p>
+          <div className={`max-w-3xl mx-auto transition-all duration-700 ease-out ${about.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <div className="mb-6">
+              <Prompt>cat about.txt</Prompt>
             </div>
+            <TerminalWindow title="about.txt">
+              <div className="space-y-4 text-sm sm:text-base leading-relaxed">
+                <div className="text-terminal-comment text-xs border-b border-terminal-border pb-3 mb-4">
+                  # Manu Janardhana — About Me
+                </div>
+                <p className="text-terminal-green">
+                  Master&apos;s graduate in{' '}
+                  <span className="text-terminal-cyan">Applied Computer Science</span>{' '}
+                  from{' '}
+                  <span className="text-terminal-amber">SRH Heidelberg</span>,
+                  with{' '}
+                  <span className="text-terminal-cyan">6 years of experience</span>{' '}
+                  in full-stack development across E-commerce, OTT platforms, and Healthcare.
+                </p>
+                <p className="text-terminal-comment">
+                  Optimized scalable systems, improving performance and reducing processing time,
+                  while overcoming architectural and scalability challenges to drive business growth.
+                </p>
+                <div className="mt-6 pt-4 border-t border-terminal-border text-xs space-y-1">
+                  <div className="flex gap-4 flex-wrap">
+                    <span><span className="text-terminal-amber">location:</span> <span className="text-terminal-green">Germany 🇩🇪</span></span>
+                    <span><span className="text-terminal-amber">status:</span> <span className="text-terminal-green">open to opportunities</span></span>
+                  </div>
+                </div>
+              </div>
+            </TerminalWindow>
           </div>
         </section>
+
+        {/* ── Experience ── */}
         <section
           id="experience"
           ref={experience.ref}
-          className='min-h-fit bg-gradient-to-r from-orange-400 to-red-500 py-16 sm:py-32 cursor-default'>
-          <div
-            className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r text-white px-4 sm:px-5 py-5"
-          >
-            <div className="text-left w-full max-w-4xl px-4 sm:px-8">
-              <h2 className={`text-3xl sm:text-4xl font-bold mb-8 sm:mb-12 text-center transition-all duration-700 ease-out ${experience.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>Experience</h2>
-              <div className="space-y-6 sm:space-y-8">
-                <div className={`relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg transition-all duration-500 ease-out hover:shadow-xl hover:-translate-y-1 ${experience.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '100ms' }}>
-                  <div className="w-full">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline text-base sm:text-lg font-medium gap-2">
-                      <a
-                        href="https://www.sap.com/germany/index.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-blue-400 px-2 py-1 rounded-md text-white text-sm sm:text-base w-fit transition-colors duration-200 hover:bg-blue-500"
-                      >
-                        SAP, Walldorf Germany
-                      </a>
-                      <div className="text-gray-700 text-sm sm:text-base">(05/2025 – present)</div>
+          className="py-20 sm:py-28 px-4 sm:px-8"
+        >
+          <div className="max-w-4xl mx-auto">
+            <div className={`mb-8 transition-all duration-700 ease-out ${experience.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <Prompt>tail -f experience.log</Prompt>
+            </div>
+            <div className="space-y-5">
+              {EXPERIENCE.map((job, idx) => (
+                <div
+                  key={job.company}
+                  className={`transition-all duration-500 ease-out ${experience.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                  style={{ transitionDelay: `${idx * 100}ms` }}
+                >
+                  <TerminalWindow title={`job_${String(idx + 1).padStart(2, '0')}.log`}>
+                    <div className="space-y-3 text-sm">
+                      {/* Header row */}
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 border-b border-terminal-border pb-3">
+                        <a
+                          href={job.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="terminal-link text-terminal-cyan font-semibold text-base"
+                        >
+                          {job.company}
+                        </a>
+                        <span className="text-terminal-amber text-xs font-mono">[{job.period}]</span>
+                      </div>
+                      <div>
+                        <span className="text-terminal-green">
+                          <span className="text-terminal-comment">role: </span>{job.role}
+                        </span>
+                        {job.project && (
+                          <p className="text-terminal-comment text-xs mt-0.5">
+                            <span className="text-terminal-amber">project: </span>{job.project}
+                          </p>
+                        )}
+                      </div>
+                      {/* Bullet log entries */}
+                      <ul className="space-y-1.5 mt-2">
+                        {job.bullets.map((b, bi) => (
+                          <li key={bi} className="flex gap-2 text-terminal-comment text-xs sm:text-sm">
+                            <span className="text-terminal-green shrink-0">▸</span>
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <p className="mt-2 font-medium  text-black">Full-Stack Developer (Working Student)</p>
-                    <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
-                      <li>Thesis project: Constructing Streamable HTTP MCP server consumed by LangChain agent with adapter for agentic API orchestration, transforming legacy app access into AI-ready unified experiences (70% UI reduction targeted).</li>
-                      <li>Piloted Joule AI proof-of-concept, onboarding Joule AI and developing AI agents tailored to internal use cases, driving innovation in cloud infrastructure automation.</li>
-                      <li>Enhanced test coverage for the "Cloud Infrastructure Cockpit" application (UI5, Java Script) by adding missing Jest test cases, aiming for 80% overall coverage.</li>
-                    </ul>
-                  </div>
+                  </TerminalWindow>
                 </div>
-                <div className={`relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg transition-all duration-500 ease-out hover:shadow-xl hover:-translate-y-1 ${experience.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '200ms' }}>
-                  <div className="w-full">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline text-base sm:text-lg font-medium gap-2">
-                      <a
-                        href="https://www.brandeis.de/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-blue-400 px-2 py-1 rounded-md text-white text-sm sm:text-base w-fit transition-colors duration-200 hover:bg-blue-500"
-                      >
-                        Brandeis Consulting GmbH
-                      </a>
-                      <div className="text-gray-700 text-sm sm:text-base">(09/2024 – 04/2025)</div>
-                    </div>
-                    <p className="mt-2 font-medium  text-black">Software Developer (Working Student)</p>
-                    <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
-                      <li>Engineered a training portal using Gatsby, Strapi (Headless CMS), JavaScript, GraphQL, and REST APIs, migrating an MDX-based content system into Strapi collections, reducing manual content updates by 80%.</li>
-                      <li>Devised an algorithm interpreting JSON data to build Strapi relational models, eliminating manual intervention, improving data loading times by 60% and reducing data errors to less than 5%.</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className={`relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg mt-6 sm:mt-8 transition-all duration-500 ease-out hover:shadow-xl hover:-translate-y-1 ${experience.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '300ms' }}>
-                  <div className="w-full">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline text-base sm:text-lg font-medium gap-2">
-                      <a
-                        href="https://www.oracle.com/in/health/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-blue-400 px-2 py-1 rounded-md text-white text-sm sm:text-base w-fit transition-colors duration-200 hover:bg-blue-500"
-                      >
-                        Oracle Health, Bangalore India
-                      </a>
-                      <div className="text-gray-700 text-sm sm:text-base">(01/2022 – 03/2024)</div>
-                    </div>
-                    <p className="mt-2 font-medium  text-black">Full Stack Developer</p>
-                    <p className="mt-1 text-sm text-gray-600 italic">SYNAPSE (Health Care Domain)</p>
-                    <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
-                      <li>Led the development of the SYNAPSE application, integrating clinical workflows and automating patient data exchange, reducing manual data entry time by 60% using JavaScript, React.js, Node.js, Ruby on Rails, and Clojure.</li>
-                      <li>Developed a modular UI design, utilizing analytical insights and conceptual thinking to enable faster customization and reduce development time by 40% for new feature rollouts.</li>
-                      <li>Refined frontend validation processes, minimizing input errors by 40%, improving form interactions, and enhancing user experience.</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className={`relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg mt-6 sm:mt-8 transition-all duration-500 ease-out hover:shadow-xl hover:-translate-y-1 ${experience.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '400ms' }}>
-                  <div className="w-full">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline text-base sm:text-lg font-medium gap-2">
-                      <a
-                        href="https://www.openturf.in/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-blue-400 px-2 py-1 rounded-md text-white text-sm sm:text-base w-fit transition-colors duration-200 hover:bg-blue-500"
-                      >
-                        Openturf Technologies, Bangalore India
-                      </a>
-                      <div className="text-gray-700 text-sm sm:text-base">(01/2020 – 01/2022)</div>
-                    </div>
-                    <p className="mt-2 font-medium  text-black">Front End Developer</p>
-                    <p className="mt-1 text-sm text-gray-600 italic">Sling Media (OTT Platform)</p>
-                    <ul className="mt-4 list-disc ml-5 text-sm text-gray-600 space-y-1">
-                      <li>Implemented user interfaces for Sling TV leveraging React, Redux Saga, RxJS, and TypeScript, decreasing average API response time by 75ms which minimized buffering events by 18%.</li>
-                      <li>Enhanced customer engagement by implementing real-time streaming optimizations, leading to a 20% increase in active viewing sessions.</li>
-                      <li>Reduced page load times by 35%, improving video playback performance across web and smart TV applications.</li>
-                      <li>Led Agile development cycles, ensuring on-time feature delivery and reducing bug resolution time by 25% through efficient debugging and testing.</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
+        {/* ── Projects ── */}
         <section
           id="projects"
           ref={projects.ref}
-          className="min-h-screen flex items-center justify-center bg-gray-100 rounded-b-3xl cursor-default px-4 sm:px-8 py-16 sm:py-24"
+          className="py-20 sm:py-28 px-4 sm:px-8"
         >
-          <div className="text-center max-w-6xl mx-auto w-full">
-            <h2 className={`text-3xl sm:text-4xl font-bold mb-8 sm:mb-12 transition-all duration-700 ease-out ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>Projects</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-              {/* PantryPal Microservices Development */}
-              <div className={`relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg transition-all duration-500 ease-out hover:scale-105 hover:bg-blue-100 hover:shadow-xl ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '100ms' }}>
-                <div className="flex flex-col justify-between items-center">
-                  <p className="text-lg font-medium">PantryPal Microservices Development</p>
-                  <p className="mt-4 text-sm text-gray-600 text-justify">
-                    Built a microservice-based grocery application using Node.js for authentication and user management.
-                    Implemented secure JWT-based authentication, user CRUD operations, Elastic search logger, rate limiter,
-                    and API documentation with Swagger. Utilized Docker to containerize and run all services on the same network.
-                    Leveraged Vue.js on the frontend for a seamless user experience.
-                  </p>
-                  <div className="w-full flex flex-row justify-between mt-8">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white transition-all duration-200 hover:bg-purple-600 hover:scale-110 cursor-pointer">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
+          <div className="max-w-5xl mx-auto">
+            <div className={`mb-8 transition-all duration-700 ease-out ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <Prompt>ls -la ./projects/</Prompt>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {PROJECTS.map((proj, idx) => (
+                <div
+                  key={proj.title}
+                  className={`transition-all duration-500 ease-out ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                  style={{ transitionDelay: `${idx * 100}ms` }}
+                >
+                  <TerminalWindow title={proj.filename} className="h-full">
+                    <div className="flex flex-col h-full gap-3 text-sm">
+                      <div className="flex justify-between items-start">
+                        <p className="text-terminal-green font-semibold">{proj.title}</p>
+                        <span className="text-terminal-amber text-xs shrink-0 ml-2">{proj.date}</span>
+                      </div>
+                      <p className="text-terminal-comment text-xs sm:text-sm leading-relaxed flex-1">{proj.description}</p>
+                      <div className="flex flex-wrap gap-1.5 pt-2 border-t border-terminal-border">
+                        {proj.tags.map(tag => (
+                          <span
+                            key={tag}
+                            className="text-xs px-2 py-0.5 border border-terminal-border text-terminal-cyan bg-terminal-bg"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-500">Jan 2025</p>
-                  </div>
+                  </TerminalWindow>
                 </div>
-              </div>
-
-              {/* CampusCash Expense Manager Development */}
-              <div className={`relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg transition-all duration-500 ease-out hover:scale-105 hover:bg-blue-100 hover:shadow-xl ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '200ms' }}>
-                <div className="flex flex-col justify-between items-center h-full">
-                  <p className="text-lg font-medium">CampusCash Expense Manager Development</p>
-                  <p className="mt-4 text-sm text-gray-600 text-justify">
-                    Built an expense management application using Vue.js, JavaScript, HTML, and CSS. Implemented advanced expense editing with splitting and validation,
-                    daily streak tracking to boost user engagement, and secure authentication with integrated search and filter functionalities for expenses.
-                  </p>
-                  <div className="w-full flex flex-row justify-between mt-8">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white transition-all duration-200 hover:bg-purple-600 hover:scale-110 cursor-pointer">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </div>
-                    <p className="text-sm text-gray-500">Dec 2024</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Integrated Property Management System (PMS) Development */}
-              <div className={`relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg transition-all duration-500 ease-out hover:scale-105 hover:bg-blue-100 hover:shadow-xl ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '300ms' }}>
-                <div className="flex flex-col justify-between items-center h-full">
-                  <p className="text-lg font-medium">Integrated Property Management System (PMS) Development</p>
-                  <p className="mt-4 text-sm text-gray-600 text-justify">
-                    Implemented a hotel management system using HTML, CSS, JavaScript, JSP, Java Servlets, JDBC, and MySQL. Features include admin and customer functionalities
-                    like account management, reservations, and surge pricing.
-                  </p>
-                  <div className="w-full flex flex-row justify-between mt-8">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white transition-all duration-200 hover:bg-purple-600 hover:scale-110 cursor-pointer">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </div>
-                    <p className="text-sm text-gray-500">Jun 2024</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Comprehensive UI/UX Solution for E-commerce Platform */}
-              <div className={`relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white shadow-lg transition-all duration-500 ease-out hover:scale-105 hover:bg-blue-100 hover:shadow-xl ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '400ms' }}>
-                <div className="flex flex-col justify-between items-center h-full">
-                  <p className="text-lg font-medium">Comprehensive UI/UX Solution for E-commerce Platform</p>
-                  <p className="mt-4 text-sm text-gray-600 text-justify">
-                    Created a responsive landing page, store page, and about-us page for trekking tools using JavaScript, Tailwind, Material Design, custom fonts,
-                    icons, and images.
-                  </p>
-                  <div className="w-full flex flex-row justify-between mt-8">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white transition-all duration-200 hover:bg-purple-600 hover:scale-110 cursor-pointer">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </div>
-                    <p className="text-sm text-gray-500">Oct 2024</p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* To-do: Fix responsive */}
-        {/* To-do: Fix project cards grid styling */}
-        {/* To-do: Re-look into color */}
-        {/* To-do: Add skills section */}
+        {/* ── Skills ── */}
+        <section
+          id="skills"
+          ref={skills.ref}
+          className="py-20 sm:py-28 px-4 sm:px-8"
+        >
+          <div className={`max-w-3xl mx-auto transition-all duration-700 ease-out ${skills.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <div className="mb-8">
+              <Prompt>cat skills.json | jq .</Prompt>
+            </div>
+            <TerminalWindow title="skills.json">
+              <div className="space-y-3">
+                <div className="text-terminal-comment text-xs border-b border-terminal-border pb-3 mb-4">
+                  # Technical proficiency — hover to inspect
+                </div>
+                {SKILLS.map((skill, idx) => (
+                  <SkillBar
+                    key={skill.name}
+                    name={skill.name}
+                    pct={skill.pct}
+                    delay={idx * 80}
+                    visible={skills.isVisible}
+                  />
+                ))}
+              </div>
+            </TerminalWindow>
+          </div>
+        </section>
 
+        {/* ── Contact ── */}
         <section
           id="contact"
           ref={contact.ref}
-          className="min-h-screen flex items-center justify-center bg-gradient-to-r from-teal-400 to-blue-500 text-white rounded-t-3xl cursor-default px-4 sm:px-8"
+          className="py-20 sm:py-28 px-4 sm:px-8"
         >
-          <div className={`text-center max-w-2xl transition-all duration-700 ease-out ${contact.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <h2 className="text-3xl sm:text-4xl font-bold">Contact</h2>
-            <p className="mt-4 text-base sm:text-lg cursor-default">
-              Feel free to reach out to me at{' '}
-              <a href={`mailto:${email}`} className="underline break-all sm:break-normal hover:text-blue-200 transition-colors duration-200">{email}</a>
-            </p>
-            <p className="mt-2 text-base sm:text-lg">
-              Connect with me on{' '}
-              <a href="https://www.linkedin.com/in/manu-janardhana/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200 transition-colors duration-200">LinkedIn</a>
-              {' '}|{' '}
-              <a href="https://github.com/manuj55" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200 transition-colors duration-200">Github</a>
-            </p>
+          <div className={`max-w-3xl mx-auto transition-all duration-700 ease-out ${contact.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <div className="mb-8">
+              <Prompt>./contact.sh --init</Prompt>
+            </div>
+            <TerminalWindow title="contact.sh">
+              <div className="space-y-4 text-sm sm:text-base">
+                <div className="text-terminal-comment text-xs border-b border-terminal-border pb-3">
+                  #!/bin/bash  # Let&apos;s connect!
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-terminal-comment text-xs">echo $EMAIL</span>
+                    <a href={`mailto:${email}`} className="terminal-link break-all">
+                      {email}
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-terminal-comment text-xs">open $LINKEDIN</span>
+                    <a
+                      href="https://www.linkedin.com/in/manu-janardhana/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="terminal-link"
+                    >
+                      linkedin.com/in/manu-janardhana
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-terminal-comment text-xs">open $GITHUB</span>
+                    <a
+                      href="https://github.com/manuj55"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="terminal-link"
+                    >
+                      github.com/manuj55
+                    </a>
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-terminal-border">
+                  <p className="text-terminal-comment text-xs">
+                    <span className="text-terminal-green">▸</span> Response time: typically within 24h
+                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Prompt>_</Prompt>
+                    <Cursor />
+                  </div>
+                </div>
+              </div>
+            </TerminalWindow>
           </div>
         </section>
+
       </main>
 
-      <footer className="py-8 bg-white text-center">
-        <p className="text-gray-600 cursor-progress">&copy; 2026 Manu Janardhana</p>
+      {/* ── Footer ── */}
+      <footer className="relative z-10 py-6 border-t border-terminal-border text-center">
+        <p className="text-terminal-comment text-xs font-mono">
+          <span className="text-terminal-green">Process exited with code 0.</span>
+          {' '}Uptime: 6+ years. &copy; 2026 Manu Janardhana
+        </p>
       </footer>
     </div>
   );
