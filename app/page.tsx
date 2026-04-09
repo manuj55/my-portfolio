@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 // ─── Intersection Observer Hook ───────────────────────────────────────────────
 function useInView(threshold = 0.1) {
@@ -40,35 +40,12 @@ function useTypingEffect(text: string, speed = 45, startDelay = 0) {
   return { displayed, done };
 }
 
-// ─── Matrix Rain Background ───────────────────────────────────────────────────
-function MatrixRain() {
-  const columns = useMemo(() => {
-    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
-    return Array.from({ length: 24 }, (_, i) => ({
-      id: i,
-      left: `${(i / 24) * 100}%`,
-      duration: `${8 + (i % 7) * 2}s`,
-      delay: `${-(i * 0.7)}s`,
-      text: Array.from({ length: 30 }, () => chars[Math.floor(Math.random() * chars.length)]).join('\n'),
-    }));
-  }, []);
-
-  return (
-    <div className="matrix-bg" aria-hidden="true">
-      {columns.map(col => (
-        <div
-          key={col.id}
-          className="matrix-column"
-          style={{ left: col.left, animationDuration: col.duration, animationDelay: col.delay }}
-        >
-          {col.text}
-        </div>
-      ))}
-    </div>
-  );
+// ─── Blinking Cursor ──────────────────────────────────────────────────────────
+function Cursor() {
+  return <span className="animate-blink text-portfolio-orange ml-0.5">█</span>;
 }
 
-// ─── Terminal Window Wrapper ──────────────────────────────────────────────────
+// ─── Terminal Window ──────────────────────────────────────────────────────────
 function TerminalWindow({ title, children, className = '' }: { title: string; children: React.ReactNode; className?: string }) {
   return (
     <div className={`terminal-window ${className}`}>
@@ -83,41 +60,45 @@ function TerminalWindow({ title, children, className = '' }: { title: string; ch
   );
 }
 
-// ─── Skill Bar ────────────────────────────────────────────────────────────────
-function SkillBar({ name, pct, delay = 0, visible }: { name: string; pct: number; delay?: number; visible: boolean }) {
-  const [animPct, setAnimPct] = useState(0);
+// ─── Section Label ────────────────────────────────────────────────────────────
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="section-label">{children}</span>
+  );
+}
+
+// ─── Skill Badge ──────────────────────────────────────────────────────────────
+function SkillBadge({ name, pct, visible, delay = 0 }: { name: string; pct: number; visible: boolean; delay?: number }) {
+  const [show, setShow] = useState(false);
   useEffect(() => {
     if (!visible) return;
-    const t = setTimeout(() => setAnimPct(pct), delay);
+    const t = setTimeout(() => setShow(true), delay);
     return () => clearTimeout(t);
-  }, [visible, pct, delay]);
+  }, [visible, delay]);
 
-  const filled = Math.round((animPct / 100) * 20);
-  const empty = 20 - filled;
   return (
-    <div className="skill-bar-track flex items-center gap-3 text-xs sm:text-sm font-mono">
-      <span className="text-terminal-comment w-28 sm:w-36 shrink-0">{name}</span>
-      <span className="text-terminal-green">
-        {'█'.repeat(filled)}
-        <span style={{ color: 'rgba(0,255,65,0.12)' }}>{'░'.repeat(empty)}</span>
-      </span>
-      <span className="text-terminal-amber ml-1">{animPct}%</span>
+    <div
+      className={`skill-badge transition-all duration-500 ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
+    >
+      <span className="text-white text-sm">{name}</span>
+      <span className="text-portfolio-orange text-xs ml-2 font-mono">{pct}%</span>
     </div>
   );
 }
 
-// ─── Blinking Cursor ──────────────────────────────────────────────────────────
-function Cursor() {
-  return <span className="animate-blink text-terminal-green ml-0.5">█</span>;
+function GitHubIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+    </svg>
+  );
 }
 
-// ─── Prompt Line ─────────────────────────────────────────────────────────────
-function Prompt({ children }: { children: React.ReactNode }) {
+function LinkedInIcon() {
   return (
-    <div className="flex items-start gap-2 text-sm sm:text-base">
-      <span className="text-terminal-green shrink-0">manu@portfolio:~$</span>
-      <span className="text-terminal-cyan">{children}</span>
-    </div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
   );
 }
 
@@ -136,16 +117,17 @@ export default function Home() {
 
   const line1 = useTypingEffect('Hello, World. I\'m Manu Janardhana.', 50, 300);
   const line2 = useTypingEffect('Senior Full-Stack Developer', 45, line1.done ? 200 : 99999);
-  const line3 = useTypingEffect('6+ years · E-commerce · OTT · Healthcare', 30, line2.done ? 200 : 99999);
+  const line3 = useTypingEffect('Applied AI · E-commerce · OTT · Healthcare', 30, line2.done ? 200 : 99999);
 
   const SKILLS = [
-    { name: 'React.js / Vue.js', pct: 95 },
     { name: 'TypeScript', pct: 90 },
     { name: 'JavaScript', pct: 95 },
+    { name: 'Python', pct: 85 },
+    { name: 'React.js / Vue.js', pct: 95 },
+    { name: 'Applied AI (LangChain / LLMs / MCP (Model Context Protocol))', pct: 85 },
     { name: 'Node.js', pct: 85 },
     { name: 'HTML / CSS', pct: 92 },
     { name: 'GraphQL', pct: 80 },
-    { name: 'Ruby on Rails', pct: 75 },
     { name: 'Docker', pct: 72 },
     { name: 'Git', pct: 90 },
   ];
@@ -158,7 +140,7 @@ export default function Home() {
       role: 'Full-Stack Developer (Working Student)',
       project: null,
       bullets: [
-        'Thesis project: Constructing Streamable HTTP MCP server consumed by LangChain agent with adapter for agentic API orchestration, transforming legacy app access into AI-ready unified experiences (70% UI reduction targeted).',
+        'Thesis project: Constructing Streamable HTTP MCP server consumed by LangChain agent with adapter for agentic API orchestration, transforming legacy app access into AI-ready unified experiences (70% UI reduction).',
         'Piloted Joule AI proof-of-concept, onboarding Joule AI and developing AI agents tailored to internal use cases, driving innovation in cloud infrastructure automation.',
         'Enhanced test coverage for the "Cloud Infrastructure Cockpit" application (UI5, JavaScript) by adding missing Jest test cases, aiming for 80% overall coverage.',
       ],
@@ -206,7 +188,7 @@ export default function Home() {
       title: 'PantryPal Microservices',
       filename: 'pantry-pal.ts',
       date: 'Jan 2025',
-      tags: ['Node.js', 'Vue.js', 'Docker', 'JWT', 'Swagger'],
+      tags: ['Node.js', 'Vue.js', 'React.js', 'Docker', 'JWT', 'Swagger'],
       description:
         'Built a microservice-based grocery application using Node.js for authentication and user management. Implemented secure JWT-based authentication, user CRUD operations, Elastic search logger, rate limiter, and API documentation with Swagger. Dockerized all services on the same network.',
     },
@@ -214,7 +196,7 @@ export default function Home() {
       title: 'CampusCash Expense Manager',
       filename: 'campus-cash.vue',
       date: 'Dec 2024',
-      tags: ['Vue.js', 'JavaScript', 'CSS'],
+      tags: ['React.js', 'JavaScript', 'CSS'],
       description:
         'Built an expense management app with advanced expense editing, splitting, validation, daily streak tracking to boost engagement, and secure authentication with integrated search and filter functionalities.',
     },
@@ -237,36 +219,33 @@ export default function Home() {
   ];
 
   const navLinks = [
-    { href: '#about', label: 'cd /about' },
-    { href: '#experience', label: 'cd /experience' },
-    { href: '#projects', label: 'cd /projects' },
-    { href: '#skills', label: 'cd /skills' },
-    { href: '#contact', label: 'cd /contact' },
+    { href: '#about', label: 'About' },
+    { href: '#experience', label: 'Experience' },
+    { href: '#projects', label: 'Projects' },
+    { href: '#skills', label: 'Skills' },
+    { href: '#contact', label: 'Contact' },
   ];
 
   return (
-    <div className="min-h-screen bg-terminal-bg text-terminal-green font-mono relative">
-      <MatrixRain />
+    <div className="min-h-screen bg-portfolio-bg text-white relative">
 
       {/* ── Header ── */}
-      <header className="fixed w-full z-50 border-b border-terminal-border bg-terminal-bg/90 backdrop-blur-md">
-        <div className="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-terminal-comment text-sm hidden sm:inline">~</span>
-            <h1 className="text-sm sm:text-base font-semibold text-terminal-green glitch">
-              manu<span className="text-terminal-cyan">@</span>portfolio
-            </h1>
-            <Cursor />
-          </div>
+      <header className="fixed w-full z-50 border-b border-portfolio-border bg-portfolio-bg/90 backdrop-blur-md">
+        <div className="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+          <a href="#" className="flex items-center gap-2 group">
+            <span className="font-mono text-lg font-semibold text-white tracking-tight">
+              Manu Janardhana<span className="text-portfolio-orange">.</span>
+            </span>
+          </a>
 
           {/* Mobile menu button */}
           <button
             id="mobile-menu-button"
-            className="md:hidden p-2 border border-terminal-border hover:border-terminal-green transition-colors duration-200 text-terminal-green"
+            className="md:hidden p-2 border border-portfolio-border hover:border-portfolio-orange transition-colors duration-200 text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            <span className="text-xs">{mobileMenuOpen ? '[×]' : '[≡]'}</span>
+            <span className="text-xs font-mono">{mobileMenuOpen ? '✕' : '☰'}</span>
           </button>
 
           {/* Desktop nav */}
@@ -275,28 +254,68 @@ export default function Home() {
               <a
                 key={link.href}
                 href={link.href}
-                className="px-3 py-1.5 text-xs text-terminal-comment hover:text-terminal-green hover:bg-terminal-border/50 transition-all duration-200 border border-transparent hover:border-terminal-border"
+                className="px-3 py-1.5 text-sm text-portfolio-secondary hover:text-white transition-colors duration-200"
               >
-                <span className="text-terminal-green">$ </span>{link.label}
+                {link.label}
               </a>
             ))}
+            <div className="w-px h-5 bg-portfolio-border mx-2" />
+            <a
+              href="https://github.com/manuj55"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-portfolio-secondary hover:text-white transition-colors duration-200"
+              aria-label="GitHub"
+            >
+              <GitHubIcon />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/manu-janardhana/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-portfolio-secondary hover:text-white transition-colors duration-200"
+              aria-label="LinkedIn"
+            >
+              <LinkedInIcon />
+            </a>
           </nav>
         </div>
 
         {/* Mobile nav */}
         {mobileMenuOpen && (
-          <nav className="md:hidden border-t border-terminal-border bg-terminal-bg/95" aria-label="Mobile navigation">
+          <nav className="md:hidden border-t border-portfolio-border bg-portfolio-bg/95 backdrop-blur-md" aria-label="Mobile navigation">
             <div className="flex flex-col py-3">
               {navLinks.map(link => (
                 <a
                   key={link.href}
                   href={link.href}
-                  className="px-6 py-2.5 text-sm text-terminal-comment hover:text-terminal-green hover:bg-terminal-border/40 transition-all duration-150"
+                  className="px-6 py-2.5 text-sm text-portfolio-secondary hover:text-white hover:bg-portfolio-surface transition-all duration-150"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <span className="text-terminal-green">$ </span>{link.label}
+                  {link.label}
                 </a>
               ))}
+              <div className="h-px bg-portfolio-border mx-6 my-2" />
+              <div className="flex gap-4 px-6 py-2">
+                <a
+                  href="https://github.com/manuj55"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-portfolio-secondary hover:text-white transition-colors duration-200"
+                  aria-label="GitHub"
+                >
+                  <GitHubIcon />
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/manu-janardhana/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-portfolio-secondary hover:text-white transition-colors duration-200"
+                  aria-label="LinkedIn"
+                >
+                  <LinkedInIcon />
+                </a>
+              </div>
             </div>
           </nav>
         )}
@@ -306,40 +325,72 @@ export default function Home() {
 
         {/* ── Hero ── */}
         <section
-          id="dev"
+          id="hero"
           ref={hero.ref}
           className="min-h-screen flex items-center justify-center px-4 sm:px-8 py-20"
         >
           <div className={`w-full max-w-3xl transition-all duration-700 ease-out ${hero.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <TerminalWindow title="~/portfolio — bash — 120×40">
-              <div className="space-y-4 min-h-[180px] sm:min-h-[200px]">
-                <Prompt>whoami</Prompt>
+            <div className="text-center mb-12">
+              <SectionLabel>FULL-STACK DEVELOPER</SectionLabel>
+              <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-semibold italic text-white mt-6 mb-6 leading-tight">
+                I build things that
+                <br />
+                perform at <span className="text-portfolio-orange">scale.</span>
+              </h1>
+              <p className="text-portfolio-secondary text-lg sm:text-xl font-serif max-w-xl mx-auto">
+                Building high-performance solutions in
+                Applied AI, E-commerce, OTT, and Healthcare.
+              </p>
+            </div>
+
+            {/* Command strip */}
+            <div className="flex justify-center mb-10">
+              <div className="inline-flex items-center gap-3 px-5 py-3 bg-portfolio-surface border border-portfolio-border rounded-lg font-mono text-sm">
+                <span className="text-portfolio-muted">$</span>
+                <span className="text-portfolio-secondary">whoami</span>
+                <span className="text-portfolio-muted">→</span>
+                <span className="text-white">manu-janardhana</span>
+                <span className="text-portfolio-orange">--senior</span>
+                <span className="text-portfolio-orange">--full-stack</span>
+              </div>
+            </div>
+
+            {/* Terminal window with typing */}
+            <TerminalWindow title="~/portfolio — bash">
+              <div className="space-y-4 min-h-[160px] sm:min-h-[180px]">
+                <div className="flex items-start gap-2 text-sm sm:text-base">
+                  <span className="text-portfolio-orange shrink-0 font-mono">❯</span>
+                  <span className="text-portfolio-secondary font-mono">whoami</span>
+                </div>
                 <div className="pl-4 sm:pl-6 space-y-2 text-sm sm:text-base">
-                  <p className="text-terminal-green text-glow-green text-xl sm:text-2xl md:text-3xl font-semibold">
+                  <p className="text-white font-serif text-xl sm:text-2xl font-semibold">
                     {line1.displayed}{!line1.done && <Cursor />}
                   </p>
                   {line1.done && (
-                    <p className="text-terminal-cyan text-lg sm:text-xl">
-                      <span className="text-terminal-amber">role: </span>
+                    <p className="text-portfolio-secondary font-mono text-sm">
+                      <span className="text-portfolio-orange">role: </span>
                       {line2.displayed}{!line2.done && <Cursor />}
                     </p>
                   )}
                   {line2.done && (
-                    <p className="text-terminal-comment text-sm sm:text-base">
-                      <span className="text-terminal-amber">exp:  </span>
+                    <p className="text-portfolio-muted font-mono text-sm">
+                      <span className="text-portfolio-orange">exp:  </span>
                       {line3.displayed}{!line3.done && <Cursor />}
                     </p>
                   )}
                 </div>
                 {line3.done && (
-                  <div className="pt-4 border-t border-terminal-border space-y-1 text-xs sm:text-sm text-terminal-comment">
-                    <Prompt>ls ./links</Prompt>
-                    <div className="pl-4 sm:pl-6 flex flex-wrap gap-4">
-                      <a href="#about" className="terminal-link">about.md</a>
-                      <a href="#experience" className="terminal-link">experience.log</a>
-                      <a href="#projects" className="terminal-link">projects/</a>
-                      <a href="#skills" className="terminal-link">skills.json</a>
-                      <a href="#contact" className="terminal-link">contact.sh</a>
+                  <div className="pt-4 border-t border-portfolio-border space-y-2 text-sm">
+                    <div className="flex items-start gap-2">
+                      <span className="text-portfolio-orange shrink-0 font-mono">❯</span>
+                      <span className="text-portfolio-secondary font-mono">ls ./sections</span>
+                    </div>
+                    <div className="pl-4 sm:pl-6 flex flex-wrap gap-4 font-mono">
+                      <a href="#about" className="portfolio-link">about.md</a>
+                      <a href="#experience" className="portfolio-link">experience.log</a>
+                      <a href="#projects" className="portfolio-link">projects/</a>
+                      <a href="#skills" className="portfolio-link">skills.json</a>
+                      <a href="#contact" className="portfolio-link">contact.sh</a>
                     </div>
                   </div>
                 )}
@@ -352,38 +403,37 @@ export default function Home() {
         <section
           id="about"
           ref={about.ref}
-          className="py-20 sm:py-28 px-4 sm:px-8"
+          className="py-24 sm:py-32 px-4 sm:px-8"
         >
           <div className={`max-w-3xl mx-auto transition-all duration-700 ease-out ${about.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="mb-6">
-              <Prompt>cat about.txt</Prompt>
+            <SectionLabel>ABOUT</SectionLabel>
+            <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-white mt-4 mb-8">
+              A bit about me
+            </h2>
+            <div className="space-y-5 font-serif text-lg leading-relaxed text-portfolio-secondary">
+              <p>
+                Master&apos;s graduate in{' '}
+                <span className="text-white font-semibold">Applied Computer Science</span>{' '}
+                from{' '}
+                <span className="text-portfolio-orange font-semibold">SRH Heidelberg</span>,
+                with extensive experience
+                in Applied AI and full-stack development across E-commerce, OTT platforms, and Healthcare.
+              </p>
+              <p className="text-portfolio-muted">
+                Optimized scalable systems, improving performance and reducing processing time,
+                while overcoming architectural and scalability challenges to drive business growth.
+              </p>
             </div>
-            <TerminalWindow title="about.txt">
-              <div className="space-y-4 text-sm sm:text-base leading-relaxed">
-                <div className="text-terminal-comment text-xs border-b border-terminal-border pb-3 mb-4">
-                  # Manu Janardhana — About Me
-                </div>
-                <p className="text-terminal-green">
-                  Master&apos;s graduate in{' '}
-                  <span className="text-terminal-cyan">Applied Computer Science</span>{' '}
-                  from{' '}
-                  <span className="text-terminal-amber">SRH Heidelberg</span>,
-                  with{' '}
-                  <span className="text-terminal-cyan">6 years of experience</span>{' '}
-                  in full-stack development across E-commerce, OTT platforms, and Healthcare.
-                </p>
-                <p className="text-terminal-comment">
-                  Optimized scalable systems, improving performance and reducing processing time,
-                  while overcoming architectural and scalability challenges to drive business growth.
-                </p>
-                <div className="mt-6 pt-4 border-t border-terminal-border text-xs space-y-1">
-                  <div className="flex gap-4 flex-wrap">
-                    <span><span className="text-terminal-amber">location:</span> <span className="text-terminal-green">Germany 🇩🇪</span></span>
-                    <span><span className="text-terminal-amber">status:</span> <span className="text-terminal-green">open to opportunities</span></span>
-                  </div>
-                </div>
-              </div>
-            </TerminalWindow>
+            <div className="mt-8 pt-6 border-t border-portfolio-border flex gap-8 flex-wrap font-mono text-sm">
+              <span>
+                <span className="text-portfolio-orange">location:</span>{' '}
+                <span className="text-white">Germany 🇩🇪</span>
+              </span>
+              <span>
+                <span className="text-portfolio-orange">status:</span>{' '}
+                <span className="text-white">open to opportunities</span>
+              </span>
+            </div>
           </div>
         </section>
 
@@ -391,54 +441,56 @@ export default function Home() {
         <section
           id="experience"
           ref={experience.ref}
-          className="py-20 sm:py-28 px-4 sm:px-8"
+          className="py-24 sm:py-32 px-4 sm:px-8"
         >
           <div className="max-w-4xl mx-auto">
-            <div className={`mb-8 transition-all duration-700 ease-out ${experience.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <Prompt>tail -f experience.log</Prompt>
+            <div className={`mb-12 transition-all duration-700 ease-out ${experience.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <SectionLabel>EXPERIENCE</SectionLabel>
+              <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-white mt-4">
+                Where I&apos;ve worked
+              </h2>
             </div>
-            <div className="space-y-5">
+            <div className="space-y-6">
               {EXPERIENCE.map((job, idx) => (
                 <div
                   key={job.company}
                   className={`transition-all duration-500 ease-out ${experience.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                  style={{ transitionDelay: `${idx * 100}ms` }}
+                  style={{ transitionDelay: `${idx * 120}ms` }}
                 >
-                  <TerminalWindow title={`job_${String(idx + 1).padStart(2, '0')}.log`}>
-                    <div className="space-y-3 text-sm">
-                      {/* Header row */}
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 border-b border-terminal-border pb-3">
-                        <a
-                          href={job.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="terminal-link text-terminal-cyan font-semibold text-base"
-                        >
-                          {job.company}
-                        </a>
-                        <span className="text-terminal-amber text-xs font-mono">[{job.period}]</span>
-                      </div>
-                      <div>
-                        <span className="text-terminal-green">
-                          <span className="text-terminal-comment">role: </span>{job.role}
-                        </span>
-                        {job.project && (
-                          <p className="text-terminal-comment text-xs mt-0.5">
-                            <span className="text-terminal-amber">project: </span>{job.project}
-                          </p>
-                        )}
-                      </div>
-                      {/* Bullet log entries */}
-                      <ul className="space-y-1.5 mt-2">
-                        {job.bullets.map((b, bi) => (
-                          <li key={bi} className="flex gap-2 text-terminal-comment text-xs sm:text-sm">
-                            <span className="text-terminal-green shrink-0">▸</span>
-                            <span>{b}</span>
-                          </li>
-                        ))}
-                      </ul>
+                  <div className="experience-card">
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+                      <a
+                        href={job.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="portfolio-link text-white font-semibold text-lg sm:text-xl"
+                      >
+                        {job.company}
+                      </a>
+                      <span className="text-portfolio-orange text-xs font-mono shrink-0">{job.period}</span>
                     </div>
-                  </TerminalWindow>
+
+                    {/* Role */}
+                    <div className="mb-4">
+                      <p className="text-white font-mono text-sm">{job.role}</p>
+                      {job.project && (
+                        <p className="text-portfolio-muted font-mono text-xs mt-1">
+                          <span className="text-portfolio-orange">project:</span> {job.project}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Bullets */}
+                    <ul className="space-y-3">
+                      {job.bullets.map((b, bi) => (
+                        <li key={bi} className="flex gap-3 text-portfolio-secondary text-sm leading-relaxed">
+                          <span className="text-portfolio-orange shrink-0 mt-1">▸</span>
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               ))}
             </div>
@@ -449,11 +501,14 @@ export default function Home() {
         <section
           id="projects"
           ref={projects.ref}
-          className="py-20 sm:py-28 px-4 sm:px-8"
+          className="py-24 sm:py-32 px-4 sm:px-8"
         >
           <div className="max-w-5xl mx-auto">
-            <div className={`mb-8 transition-all duration-700 ease-out ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <Prompt>ls -la ./projects/</Prompt>
+            <div className={`mb-12 transition-all duration-700 ease-out ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <SectionLabel>PROJECTS</SectionLabel>
+              <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-white mt-4">
+                Things I&apos;ve built
+              </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {PROJECTS.map((proj, idx) => (
@@ -463,17 +518,19 @@ export default function Home() {
                   style={{ transitionDelay: `${idx * 100}ms` }}
                 >
                   <TerminalWindow title={proj.filename} className="h-full">
-                    <div className="flex flex-col h-full gap-3 text-sm">
+                    <div className="flex flex-col h-full gap-3">
                       <div className="flex justify-between items-start">
-                        <p className="text-terminal-green font-semibold">{proj.title}</p>
-                        <span className="text-terminal-amber text-xs shrink-0 ml-2">{proj.date}</span>
+                        <p className="text-white font-semibold text-base">{proj.title}</p>
+                        <span className="text-portfolio-orange text-xs shrink-0 ml-2 font-mono">{proj.date}</span>
                       </div>
-                      <p className="text-terminal-comment text-xs sm:text-sm leading-relaxed flex-1">{proj.description}</p>
-                      <div className="flex flex-wrap gap-1.5 pt-2 border-t border-terminal-border">
+                      <p className="text-portfolio-secondary text-sm leading-relaxed flex-1">
+                        {proj.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2 pt-3 border-t border-portfolio-border">
                         {proj.tags.map(tag => (
                           <span
                             key={tag}
-                            className="text-xs px-2 py-0.5 border border-terminal-border text-terminal-cyan bg-terminal-bg"
+                            className="tag-pill"
                           >
                             {tag}
                           </span>
@@ -491,28 +548,24 @@ export default function Home() {
         <section
           id="skills"
           ref={skills.ref}
-          className="py-20 sm:py-28 px-4 sm:px-8"
+          className="py-24 sm:py-32 px-4 sm:px-8"
         >
           <div className={`max-w-3xl mx-auto transition-all duration-700 ease-out ${skills.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="mb-8">
-              <Prompt>cat skills.json | jq .</Prompt>
+            <SectionLabel>SKILLS</SectionLabel>
+            <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-white mt-4 mb-10">
+              My toolkit
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              {SKILLS.map((skill, idx) => (
+                <SkillBadge
+                  key={skill.name}
+                  name={skill.name}
+                  pct={skill.pct}
+                  delay={idx * 80}
+                  visible={skills.isVisible}
+                />
+              ))}
             </div>
-            <TerminalWindow title="skills.json">
-              <div className="space-y-3">
-                <div className="text-terminal-comment text-xs border-b border-terminal-border pb-3 mb-4">
-                  # Technical proficiency — hover to inspect
-                </div>
-                {SKILLS.map((skill, idx) => (
-                  <SkillBar
-                    key={skill.name}
-                    name={skill.name}
-                    pct={skill.pct}
-                    delay={idx * 80}
-                    visible={skills.isVisible}
-                  />
-                ))}
-              </div>
-            </TerminalWindow>
           </div>
         </section>
 
@@ -520,53 +573,51 @@ export default function Home() {
         <section
           id="contact"
           ref={contact.ref}
-          className="py-20 sm:py-28 px-4 sm:px-8"
+          className="py-24 sm:py-32 px-4 sm:px-8"
         >
           <div className={`max-w-3xl mx-auto transition-all duration-700 ease-out ${contact.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="mb-8">
-              <Prompt>./contact.sh --init</Prompt>
-            </div>
+            <SectionLabel>CONTACT</SectionLabel>
+            <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-white mt-4 mb-4">
+              Let&apos;s connect
+            </h2>
+            <p className="font-serif text-lg text-portfolio-secondary italic mb-10">
+              Available for new opportunities — I typically respond within 24 hours.
+            </p>
+
             <TerminalWindow title="contact.sh">
-              <div className="space-y-4 text-sm sm:text-base">
-                <div className="text-terminal-comment text-xs border-b border-terminal-border pb-3">
-                  #!/bin/bash  # Let&apos;s connect!
+              <div className="space-y-4 text-sm sm:text-base font-mono">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-portfolio-muted text-xs">echo $EMAIL</span>
+                  <a href={`mailto:${email}`} className="portfolio-link font-semibold break-all">
+                    {email}
+                  </a>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-terminal-comment text-xs">echo $EMAIL</span>
-                    <a href={`mailto:${email}`} className="terminal-link break-all">
-                      {email}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-terminal-comment text-xs">open $LINKEDIN</span>
-                    <a
-                      href="https://www.linkedin.com/in/manu-janardhana/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="terminal-link"
-                    >
-                      linkedin.com/in/manu-janardhana
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-terminal-comment text-xs">open $GITHUB</span>
-                    <a
-                      href="https://github.com/manuj55"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="terminal-link"
-                    >
-                      github.com/manuj55
-                    </a>
-                  </div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-portfolio-muted text-xs">open $LINKEDIN</span>
+                  <a
+                    href="https://www.linkedin.com/in/manu-janardhana/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="portfolio-link font-semibold"
+                  >
+                    linkedin.com/in/manu-janardhana
+                  </a>
                 </div>
-                <div className="pt-4 border-t border-terminal-border">
-                  <p className="text-terminal-comment text-xs">
-                    <span className="text-terminal-green">▸</span> Response time: typically within 24h
-                  </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Prompt>_</Prompt>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-portfolio-muted text-xs">open $GITHUB</span>
+                  <a
+                    href="https://github.com/manuj55"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="portfolio-link font-semibold"
+                  >
+                    github.com/manuj55
+                  </a>
+                </div>
+                <div className="pt-4 border-t border-portfolio-border">
+                  <div className="flex items-center gap-2">
+                    <span className="text-portfolio-orange font-mono">❯</span>
+                    <span className="text-portfolio-secondary">_</span>
                     <Cursor />
                   </div>
                 </div>
@@ -578,10 +629,9 @@ export default function Home() {
       </main>
 
       {/* ── Footer ── */}
-      <footer className="relative z-10 py-6 border-t border-terminal-border text-center">
-        <p className="text-terminal-comment text-xs font-mono">
-          <span className="text-terminal-green">Process exited with code 0.</span>
-          {' '}Uptime: 6+ years. &copy; 2026 Manu Janardhana
+      <footer className="relative z-10 py-8 border-t border-portfolio-border text-center">
+        <p className="text-portfolio-muted text-xs font-mono">
+          &copy; 2026 Manu Janardhana
         </p>
       </footer>
     </div>
