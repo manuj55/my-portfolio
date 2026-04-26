@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import ParticleNetwork from '../components/ParticleNetwork';
 
 // ─── Intersection Observer Hook ───────────────────────────────────────────────
 function useInView(threshold = 0.1) {
@@ -228,6 +229,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-portfolio-bg text-white relative">
+      <ParticleNetwork />
 
       {/* ── Header ── */}
       <header className="fixed w-full z-50 border-b border-portfolio-border bg-portfolio-bg/90 backdrop-blur-md">
