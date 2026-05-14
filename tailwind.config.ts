@@ -26,8 +26,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ['Newsreader', 'Georgia', 'Cambria', 'serif'],
-        mono: ['"JetBrains Mono"', 'Fira Code', 'Consolas', 'monospace'],
+        serif: ['Georgia', 'Cambria', 'Times New Roman', 'serif'],
+        mono: ['var(--font-mono)', 'Fira Code', 'Consolas', 'monospace'],
       },
       keyframes: {
         blink: {

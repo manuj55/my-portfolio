@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
-
 /* ============================
    CSS Variables
    ============================ */
@@ -96,7 +94,7 @@ body::before {
   margin-left: 8px;
   font-size: 12px;
   color: var(--text-muted);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
 }
 
 /* ============================
@@ -104,7 +102,7 @@ body::before {
    ============================ */
 .section-label {
   display: inline-block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.15em;
@@ -157,7 +155,7 @@ body::before {
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--text-secondary);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   background: var(--bg);
   transition: border-color 0.2s ease, color 0.2s ease;
 }

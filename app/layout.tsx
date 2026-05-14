@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Newsreader } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-});
-
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-serif",
-  style: ["normal", "italic"],
-  weight: ["400", "600"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${jetbrainsMono.variable} ${newsreader.variable} font-sans bg-portfolio-bg text-white`}>
+      <body className={`${jetbrainsMono.variable} font-sans bg-portfolio-bg text-white`}>
         {children}
       </body>
     </html>

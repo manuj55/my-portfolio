@@ -2,6 +2,18 @@
 
 import { useState, useEffect, useRef } from 'react';
 import ParticleNetwork from '../components/ParticleNetwork';
+import { FEATURED_PROJECTS, GITHUB_USERNAME, type FeaturedProjectConfig } from '../data/projects';
+
+type ProjectCard = {
+  title: string;
+  filename: string;
+  date: string;
+  tags: string[];
+  description: string;
+  githubUrl?: string;
+  liveUrl?: string;
+  meta?: string;
+};
 
 // ─── Intersection Observer Hook ───────────────────────────────────────────────
 function useInView(threshold = 0.1) {
@@ -103,9 +115,58 @@ function LinkedInIcon() {
   );
 }
 
+type GitHubRepo = {
+  name: string;
+  html_url: string;
+  description: string | null;
+  homepage: string | null;
+  topics?: string[];
+  language: string | null;
+  stargazers_count: number;
+  updated_at: string;
+  fork: boolean;
+  archived: boolean;
+};
+
+const FALLBACK_PROJECTS: ProjectCard[] = FEATURED_PROJECTS
+  .sort((a, b) => a.order - b.order)
+  .map(project => ({
+    title: project.title,
+    filename: project.filename,
+    date: 'Featured',
+    tags: project.tags,
+    description: project.description,
+    githubUrl: project.showGithubLink === false ? undefined : `https://github.com/${GITHUB_USERNAME}/${project.repo}`,
+    liveUrl: project.showLiveDemoLink === false ? undefined : project.liveUrl,
+  }));
+
+function formatProjectDate(date: string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function mapProjectToCard(project: FeaturedProjectConfig, repo?: GitHubRepo): ProjectCard {
+  const githubTags = [...(repo?.topics ?? []), repo?.language].filter(Boolean) as string[];
+  const tags = project.tags.length > 0 ? project.tags : githubTags;
+
+  return {
+    title: project.title,
+    filename: project.filename,
+    date: repo ? formatProjectDate(repo.updated_at) : 'Featured',
+    tags: tags.slice(0, 6),
+    description: project.description || repo?.description || 'View this project on GitHub.',
+    githubUrl: project.showGithubLink === false ? undefined : repo?.html_url || `https://github.com/${GITHUB_USERNAME}/${project.repo}`,
+    liveUrl: project.showLiveDemoLink === false ? undefined : project.liveUrl || repo?.homepage || undefined,
+    meta: repo ? `★ ${repo.stargazers_count}` : undefined,
+  };
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [projectCards, setProjectCards] = useState<ProjectCard[]>(FALLBACK_PROJECTS);
 
   const hero = useInView(0.05);
   const about = useInView(0.1);
@@ -184,40 +245,38 @@ export default function Home() {
     },
   ];
 
-  const PROJECTS = [
-    {
-      title: 'PantryPal Microservices',
-      filename: 'pantry-pal.ts',
-      date: 'Jan 2025',
-      tags: ['Node.js', 'Vue.js', 'React.js', 'Docker', 'JWT', 'Swagger'],
-      description:
-        'Built a microservice-based grocery application using Node.js for authentication and user management. Implemented secure JWT-based authentication, user CRUD operations, Elastic search logger, rate limiter, and API documentation with Swagger. Dockerized all services on the same network.',
-    },
-    {
-      title: 'CampusCash Expense Manager',
-      filename: 'campus-cash.vue',
-      date: 'Dec 2024',
-      tags: ['React.js', 'JavaScript', 'CSS'],
-      description:
-        'Built an expense management app with advanced expense editing, splitting, validation, daily streak tracking to boost engagement, and secure authentication with integrated search and filter functionalities.',
-    },
-    {
-      title: 'Property Management System',
-      filename: 'pms.java',
-      date: 'Jun 2024',
-      tags: ['Java', 'JSP', 'MySQL', 'JDBC'],
-      description:
-        'Implemented a hotel management system using HTML, CSS, JavaScript, JSP, Java Servlets, JDBC, and MySQL. Features include admin and customer functionalities like account management, reservations, and surge pricing.',
-    },
-    {
-      title: 'E-commerce UI/UX Solution',
-      filename: 'ecommerce-ui.tsx',
-      date: 'Oct 2024',
-      tags: ['JavaScript', 'Tailwind', 'Material Design'],
-      description:
-        'Created a responsive landing page, store page, and about-us page for a trekking tools brand using JavaScript, Tailwind, Material Design, custom fonts, icons, and images.',
-    },
-  ];
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated`, {
+          headers: {
+            Accept: 'application/vnd.github+json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch GitHub repositories');
+        }
+
+        const repos: GitHubRepo[] = await response.json();
+        const repoMap = new Map(
+          repos
+            .filter(repo => !repo.fork && !repo.archived)
+            .map(repo => [repo.name.toLowerCase(), repo])
+        );
+
+        const featuredProjects = [...FEATURED_PROJECTS]
+          .sort((a, b) => a.order - b.order)
+          .map(project => mapProjectToCard(project, repoMap.get(project.repo.toLowerCase())));
+
+        setProjectCards(featuredProjects);
+      } catch (error) {
+        console.error('Unable to load GitHub projects:', error);
+      }
+    };
+
+    loadProjects();
+  }, []);
 
   const navLinks = [
     { href: '#about', label: 'About' },
@@ -513,7 +572,7 @@ export default function Home() {
               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {PROJECTS.map((proj, idx) => (
+              {projectCards.map((proj, idx) => (
                 <div
                   key={proj.title}
                   className={`transition-all duration-500 ease-out ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
@@ -521,9 +580,38 @@ export default function Home() {
                 >
                   <TerminalWindow title={proj.filename} className="h-full">
                     <div className="flex flex-col h-full gap-3">
-                      <div className="flex justify-between items-start">
-                        <p className="text-white font-semibold text-base">{proj.title}</p>
-                        <span className="text-portfolio-orange text-xs shrink-0 ml-2 font-mono">{proj.date}</span>
+                      <div className="flex justify-between items-start gap-3">
+                        <div>
+                          <p className="text-white font-semibold text-base">{proj.title}</p>
+                          {(proj.githubUrl || proj.liveUrl) && (
+                            <div className="flex flex-wrap gap-3 mt-1">
+                              {proj.githubUrl && (
+                                <a
+                                  href={proj.githubUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="portfolio-link text-xs font-mono inline-block"
+                                >
+                                  github ↗
+                                </a>
+                              )}
+                              {proj.liveUrl && (
+                                <a
+                                  href={proj.liveUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="portfolio-link text-xs font-mono inline-block"
+                                >
+                                  live demo ↗
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right shrink-0 ml-2 font-mono">
+                          <span className="text-portfolio-orange text-xs block">{proj.date}</span>
+                          {proj.meta && <span className="text-portfolio-muted text-xs block mt-1">{proj.meta}</span>}
+                        </div>
                       </div>
                       <p className="text-portfolio-secondary text-sm leading-relaxed flex-1">
                         {proj.description}
