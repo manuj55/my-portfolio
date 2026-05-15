@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import ParticleNetwork from '../components/ParticleNetwork';
 import { FEATURED_PROJECTS, GITHUB_USERNAME, type FeaturedProjectConfig } from '../data/projects';
@@ -115,6 +116,31 @@ function LinkedInIcon() {
   );
 }
 
+function AgentIcon({ kind }: { kind: 'pi' | 'claude' | 'codex' | 'kimi' }) {
+  const baseClass = 'w-12 h-12 rounded-xl border border-portfolio-border bg-portfolio-surface flex items-center justify-center shrink-0';
+
+  const logos = {
+    pi: { src: '/brands/pi.svg', alt: 'Pi logo', className: 'w-7 h-7' },
+    claude: { src: '/brands/claude.ico', alt: 'Claude logo', className: 'w-7 h-7 rounded-md' },
+    codex: { src: '/brands/openai.svg', alt: 'OpenAI logo', className: 'w-7 h-7' },
+    kimi: { src: '/brands/kimi.ico', alt: 'Kimi logo', className: 'w-7 h-7 rounded-md' },
+  } as const;
+
+  const logo = logos[kind];
+
+  return (
+    <div className={baseClass} aria-hidden="true">
+      <Image
+        src={logo.src}
+        alt={logo.alt}
+        width={28}
+        height={28}
+        className={logo.className}
+      />
+    </div>
+  );
+}
+
 type GitHubRepo = {
   name: string;
   html_url: string;
@@ -171,8 +197,9 @@ export default function Home() {
   const hero = useInView(0.05);
   const about = useInView(0.1);
   const experience = useInView(0.05);
-  const projects = useInView(0.05);
   const skills = useInView(0.1);
+  const codingAgents = useInView(0.05);
+  const projects = useInView(0.05);
   const contact = useInView(0.1);
 
   const email = ['manujanardhana55', 'gmail.com'].join('@');
@@ -192,6 +219,37 @@ export default function Home() {
     { name: 'GraphQL', pct: 80 },
     { name: 'Docker', pct: 72 },
     { name: 'Git', pct: 90 },
+  ];
+
+  const CODING_AGENTS = [
+    {
+      name: 'Pi Coding Agent',
+      icon: 'pi' as const,
+      title: 'Primary coding workflow',
+      description: 'Used for repo-aware development, file operations, implementation, and structured code changes.',
+      tags: ['Codebase editing', 'Terminal workflows', 'Project context'],
+    },
+    {
+      name: 'Claude Code',
+      icon: 'claude' as const,
+      title: 'Deep reasoning support',
+      description: 'Helpful for architecture thinking, large refactors, and validating implementation strategies.',
+      tags: ['Reasoning', 'Refactoring', 'Code reviews'],
+    },
+    {
+      name: 'Codex',
+      icon: 'codex' as const,
+      title: 'Fast implementation assistance',
+      description: 'Used to accelerate coding tasks, prototyping, and code generation across web projects.',
+      tags: ['Rapid prototyping', 'Implementation', 'Automation'],
+    },
+    {
+      name: 'Kimi K2 agent swarms',
+      icon: 'kimi' as const,
+      title: 'Multi-agent exploration',
+      description: 'Applied when parallel ideation or broader solution exploration is useful for complex tasks.',
+      tags: ['Agent swarms', 'Exploration', 'Parallel thinking'],
+    },
   ];
 
   const EXPERIENCE = [
@@ -281,8 +339,9 @@ export default function Home() {
   const navLinks = [
     { href: '#about', label: 'About' },
     { href: '#experience', label: 'Experience' },
-    { href: '#projects', label: 'Projects' },
     { href: '#skills', label: 'Skills' },
+    { href: '#coding-agents', label: 'Coding Agents' },
+    { href: '#projects', label: 'Projects' },
     { href: '#contact', label: 'Contact' },
   ];
 
@@ -449,8 +508,9 @@ export default function Home() {
                     <div className="pl-4 sm:pl-6 flex flex-wrap gap-4 font-mono">
                       <a href="#about" className="portfolio-link">about.md</a>
                       <a href="#experience" className="portfolio-link">experience.log</a>
-                      <a href="#projects" className="portfolio-link">projects/</a>
                       <a href="#skills" className="portfolio-link">skills.json</a>
+                      <a href="#coding-agents" className="portfolio-link">coding-agents.yml</a>
+                      <a href="#projects" className="portfolio-link">projects/</a>
                       <a href="#contact" className="portfolio-link">contact.sh</a>
                     </div>
                   </div>
@@ -558,6 +618,82 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── Skills ── */}
+        <section
+          id="skills"
+          ref={skills.ref}
+          className="py-24 sm:py-32 px-4 sm:px-8"
+        >
+          <div className={`max-w-3xl mx-auto transition-all duration-700 ease-out ${skills.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <SectionLabel>SKILLS</SectionLabel>
+            <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-white mt-4 mb-10">
+              My toolkit
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              {SKILLS.map((skill, idx) => (
+                <SkillBadge
+                  key={skill.name}
+                  name={skill.name}
+                  pct={skill.pct}
+                  delay={idx * 80}
+                  visible={skills.isVisible}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Coding Agents ── */}
+        <section
+          id="coding-agents"
+          ref={codingAgents.ref}
+          className="py-24 sm:py-32 px-4 sm:px-8"
+        >
+          <div className="max-w-5xl mx-auto">
+            <div className={`mb-12 transition-all duration-700 ease-out ${codingAgents.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <SectionLabel>CODING AGENTS</SectionLabel>
+              <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-white mt-4 mb-4">
+                Agentic tools I use
+              </h2>
+              <p className="max-w-3xl text-portfolio-secondary font-serif text-lg leading-relaxed">
+                I use coding agents to support requirement-centric development — choosing the right tool for implementation,
+                reasoning, validation, and faster delivery.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {CODING_AGENTS.map((agent, idx) => (
+                <div
+                  key={agent.name}
+                  className={`transition-all duration-500 ease-out ${codingAgents.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                  style={{ transitionDelay: `${idx * 100}ms` }}
+                >
+                  <TerminalWindow title={`${agent.name}.tool`} className="h-full">
+                    <div className="flex flex-col h-full gap-3">
+                      <div className="flex items-start gap-4">
+                        <AgentIcon kind={agent.icon} />
+                        <div>
+                          <p className="text-white font-semibold text-base">{agent.name}</p>
+                          <p className="text-portfolio-orange text-xs font-mono mt-1">{agent.title}</p>
+                        </div>
+                      </div>
+                      <p className="text-portfolio-secondary text-sm leading-relaxed flex-1">
+                        {agent.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2 pt-3 border-t border-portfolio-border">
+                        {agent.tags.map(tag => (
+                          <span key={tag} className="tag-pill">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </TerminalWindow>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ── Projects ── */}
         <section
           id="projects"
@@ -629,31 +765,6 @@ export default function Home() {
                     </div>
                   </TerminalWindow>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Skills ── */}
-        <section
-          id="skills"
-          ref={skills.ref}
-          className="py-24 sm:py-32 px-4 sm:px-8"
-        >
-          <div className={`max-w-3xl mx-auto transition-all duration-700 ease-out ${skills.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <SectionLabel>SKILLS</SectionLabel>
-            <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-white mt-4 mb-10">
-              My toolkit
-            </h2>
-            <div className="flex flex-wrap gap-3">
-              {SKILLS.map((skill, idx) => (
-                <SkillBadge
-                  key={skill.name}
-                  name={skill.name}
-                  pct={skill.pct}
-                  delay={idx * 80}
-                  visible={skills.isVisible}
-                />
               ))}
             </div>
           </div>
