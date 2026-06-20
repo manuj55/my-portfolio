@@ -1,7 +1,20 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import ParticleNetwork from '../components/ParticleNetwork';
+import { FEATURED_PROJECTS, GITHUB_USERNAME, type FeaturedProjectConfig } from '../data/projects';
+
+type ProjectCard = {
+  title: string;
+  filename: string;
+  date: string;
+  tags: string[];
+  description: string;
+  githubUrl?: string;
+  liveUrl?: string;
+  meta?: string;
+};
 
 // ─── Intersection Observer Hook ───────────────────────────────────────────────
 function useInView(threshold = 0.1) {
@@ -103,15 +116,90 @@ function LinkedInIcon() {
   );
 }
 
+function AgentIcon({ kind }: { kind: 'pi' | 'claude' | 'codex' | 'kimi' }) {
+  const baseClass = 'w-12 h-12 rounded-xl border border-portfolio-border bg-portfolio-surface flex items-center justify-center shrink-0';
+
+  const logos = {
+    pi: { src: '/brands/pi.svg', alt: 'Pi logo', className: 'w-7 h-7' },
+    claude: { src: '/brands/claude.ico', alt: 'Claude logo', className: 'w-7 h-7 rounded-md' },
+    codex: { src: '/brands/openai.svg', alt: 'OpenAI logo', className: 'w-7 h-7' },
+    kimi: { src: '/brands/kimi.ico', alt: 'Kimi logo', className: 'w-7 h-7 rounded-md' },
+  } as const;
+
+  const logo = logos[kind];
+
+  return (
+    <div className={baseClass} aria-hidden="true">
+      <Image
+        src={logo.src}
+        alt={logo.alt}
+        width={28}
+        height={28}
+        className={logo.className}
+      />
+    </div>
+  );
+}
+
+type GitHubRepo = {
+  name: string;
+  html_url: string;
+  description: string | null;
+  homepage: string | null;
+  topics?: string[];
+  language: string | null;
+  stargazers_count: number;
+  updated_at: string;
+  fork: boolean;
+  archived: boolean;
+};
+
+const FALLBACK_PROJECTS: ProjectCard[] = FEATURED_PROJECTS
+  .sort((a, b) => a.order - b.order)
+  .map(project => ({
+    title: project.title,
+    filename: project.filename,
+    date: 'Featured',
+    tags: project.tags,
+    description: project.description,
+    githubUrl: project.showGithubLink === false ? undefined : `https://github.com/${GITHUB_USERNAME}/${project.repo}`,
+    liveUrl: project.showLiveDemoLink === false ? undefined : project.liveUrl,
+  }));
+
+function formatProjectDate(date: string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function mapProjectToCard(project: FeaturedProjectConfig, repo?: GitHubRepo): ProjectCard {
+  const githubTags = [...(repo?.topics ?? []), repo?.language].filter(Boolean) as string[];
+  const tags = project.tags.length > 0 ? project.tags : githubTags;
+
+  return {
+    title: project.title,
+    filename: project.filename,
+    date: repo ? formatProjectDate(repo.updated_at) : 'Featured',
+    tags: tags.slice(0, 6),
+    description: project.description || repo?.description || 'View this project on GitHub.',
+    githubUrl: project.showGithubLink === false ? undefined : repo?.html_url || `https://github.com/${GITHUB_USERNAME}/${project.repo}`,
+    liveUrl: project.showLiveDemoLink === false ? undefined : project.liveUrl || repo?.homepage || undefined,
+    meta: repo ? `★ ${repo.stargazers_count}` : undefined,
+  };
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [projectCards, setProjectCards] = useState<ProjectCard[]>(FALLBACK_PROJECTS);
 
   const hero = useInView(0.05);
   const about = useInView(0.1);
   const experience = useInView(0.05);
-  const projects = useInView(0.05);
   const skills = useInView(0.1);
+  const codingAgents = useInView(0.05);
+  const projects = useInView(0.05);
   const contact = useInView(0.1);
 
   const email = ['manujanardhana55', 'gmail.com'].join('@');
@@ -131,6 +219,37 @@ export default function Home() {
     { name: 'GraphQL', pct: 80 },
     { name: 'Docker', pct: 72 },
     { name: 'Git', pct: 90 },
+  ];
+
+  const CODING_AGENTS = [
+    {
+      name: 'Pi Coding Agent',
+      icon: 'pi' as const,
+      title: 'Primary coding workflow',
+      description: 'Used for repo-aware development, file operations, implementation, and structured code changes.',
+      tags: ['Codebase editing', 'Terminal workflows', 'Project context'],
+    },
+    {
+      name: 'Claude Code',
+      icon: 'claude' as const,
+      title: 'Deep reasoning support',
+      description: 'Helpful for architecture thinking, large refactors, and validating implementation strategies.',
+      tags: ['Reasoning', 'Refactoring', 'Code reviews'],
+    },
+    {
+      name: 'Codex',
+      icon: 'codex' as const,
+      title: 'Fast implementation assistance',
+      description: 'Used to accelerate coding tasks, prototyping, and code generation across web projects.',
+      tags: ['Rapid prototyping', 'Implementation', 'Automation'],
+    },
+    {
+      name: 'Kimi K2 agent swarms',
+      icon: 'kimi' as const,
+      title: 'Multi-agent exploration',
+      description: 'Applied when parallel ideation or broader solution exploration is useful for complex tasks.',
+      tags: ['Agent swarms', 'Exploration', 'Parallel thinking'],
+    },
   ];
 
   const EXPERIENCE = [
@@ -184,46 +303,45 @@ export default function Home() {
     },
   ];
 
-  const PROJECTS = [
-    {
-      title: 'PantryPal Microservices',
-      filename: 'pantry-pal.ts',
-      date: 'Jan 2025',
-      tags: ['Node.js', 'Vue.js', 'React.js', 'Docker', 'JWT', 'Swagger'],
-      description:
-        'Built a microservice-based grocery application using Node.js for authentication and user management. Implemented secure JWT-based authentication, user CRUD operations, Elastic search logger, rate limiter, and API documentation with Swagger. Dockerized all services on the same network.',
-    },
-    {
-      title: 'CampusCash Expense Manager',
-      filename: 'campus-cash.vue',
-      date: 'Dec 2024',
-      tags: ['React.js', 'JavaScript', 'CSS'],
-      description:
-        'Built an expense management app with advanced expense editing, splitting, validation, daily streak tracking to boost engagement, and secure authentication with integrated search and filter functionalities.',
-    },
-    {
-      title: 'Property Management System',
-      filename: 'pms.java',
-      date: 'Jun 2024',
-      tags: ['Java', 'JSP', 'MySQL', 'JDBC'],
-      description:
-        'Implemented a hotel management system using HTML, CSS, JavaScript, JSP, Java Servlets, JDBC, and MySQL. Features include admin and customer functionalities like account management, reservations, and surge pricing.',
-    },
-    {
-      title: 'E-commerce UI/UX Solution',
-      filename: 'ecommerce-ui.tsx',
-      date: 'Oct 2024',
-      tags: ['JavaScript', 'Tailwind', 'Material Design'],
-      description:
-        'Created a responsive landing page, store page, and about-us page for a trekking tools brand using JavaScript, Tailwind, Material Design, custom fonts, icons, and images.',
-    },
-  ];
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated`, {
+          headers: {
+            Accept: 'application/vnd.github+json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch GitHub repositories');
+        }
+
+        const repos: GitHubRepo[] = await response.json();
+        const repoMap = new Map(
+          repos
+            .filter(repo => !repo.fork && !repo.archived)
+            .map(repo => [repo.name.toLowerCase(), repo])
+        );
+
+        const featuredProjects = [...FEATURED_PROJECTS]
+          .sort((a, b) => a.order - b.order)
+          .map(project => mapProjectToCard(project, repoMap.get(project.repo.toLowerCase())));
+
+        setProjectCards(featuredProjects);
+      } catch (error) {
+        console.error('Unable to load GitHub projects:', error);
+      }
+    };
+
+    loadProjects();
+  }, []);
 
   const navLinks = [
     { href: '#about', label: 'About' },
     { href: '#experience', label: 'Experience' },
-    { href: '#projects', label: 'Projects' },
     { href: '#skills', label: 'Skills' },
+    { href: '#coding-agents', label: 'Coding Agents' },
+    { href: '#projects', label: 'Projects' },
     { href: '#contact', label: 'Contact' },
   ];
 
@@ -390,8 +508,9 @@ export default function Home() {
                     <div className="pl-4 sm:pl-6 flex flex-wrap gap-4 font-mono">
                       <a href="#about" className="portfolio-link">about.md</a>
                       <a href="#experience" className="portfolio-link">experience.log</a>
-                      <a href="#projects" className="portfolio-link">projects/</a>
                       <a href="#skills" className="portfolio-link">skills.json</a>
+                      <a href="#coding-agents" className="portfolio-link">coding-agents.yml</a>
+                      <a href="#projects" className="portfolio-link">projects/</a>
                       <a href="#contact" className="portfolio-link">contact.sh</a>
                     </div>
                   </div>
@@ -499,53 +618,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Projects ── */}
-        <section
-          id="projects"
-          ref={projects.ref}
-          className="py-24 sm:py-32 px-4 sm:px-8"
-        >
-          <div className="max-w-5xl mx-auto">
-            <div className={`mb-12 transition-all duration-700 ease-out ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <SectionLabel>PROJECTS</SectionLabel>
-              <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-white mt-4">
-                Things I&apos;ve built
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {PROJECTS.map((proj, idx) => (
-                <div
-                  key={proj.title}
-                  className={`transition-all duration-500 ease-out ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                  style={{ transitionDelay: `${idx * 100}ms` }}
-                >
-                  <TerminalWindow title={proj.filename} className="h-full">
-                    <div className="flex flex-col h-full gap-3">
-                      <div className="flex justify-between items-start">
-                        <p className="text-white font-semibold text-base">{proj.title}</p>
-                        <span className="text-portfolio-orange text-xs shrink-0 ml-2 font-mono">{proj.date}</span>
-                      </div>
-                      <p className="text-portfolio-secondary text-sm leading-relaxed flex-1">
-                        {proj.description}
-                      </p>
-                      <div className="flex flex-wrap gap-2 pt-3 border-t border-portfolio-border">
-                        {proj.tags.map(tag => (
-                          <span
-                            key={tag}
-                            className="tag-pill"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </TerminalWindow>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ── Skills ── */}
         <section
           id="skills"
@@ -566,6 +638,133 @@ export default function Home() {
                   delay={idx * 80}
                   visible={skills.isVisible}
                 />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Coding Agents ── */}
+        <section
+          id="coding-agents"
+          ref={codingAgents.ref}
+          className="py-24 sm:py-32 px-4 sm:px-8"
+        >
+          <div className="max-w-5xl mx-auto">
+            <div className={`mb-12 transition-all duration-700 ease-out ${codingAgents.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <SectionLabel>CODING AGENTS</SectionLabel>
+              <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-white mt-4 mb-4">
+                Agentic tools I use
+              </h2>
+              <p className="max-w-3xl text-portfolio-secondary font-serif text-lg leading-relaxed">
+                I use coding agents to support requirement-centric development — choosing the right tool for implementation,
+                reasoning, validation, and faster delivery.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {CODING_AGENTS.map((agent, idx) => (
+                <div
+                  key={agent.name}
+                  className={`transition-all duration-500 ease-out ${codingAgents.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                  style={{ transitionDelay: `${idx * 100}ms` }}
+                >
+                  <TerminalWindow title={`${agent.name}.tool`} className="h-full">
+                    <div className="flex flex-col h-full gap-3">
+                      <div className="flex items-start gap-4">
+                        <AgentIcon kind={agent.icon} />
+                        <div>
+                          <p className="text-white font-semibold text-base">{agent.name}</p>
+                          <p className="text-portfolio-orange text-xs font-mono mt-1">{agent.title}</p>
+                        </div>
+                      </div>
+                      <p className="text-portfolio-secondary text-sm leading-relaxed flex-1">
+                        {agent.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2 pt-3 border-t border-portfolio-border">
+                        {agent.tags.map(tag => (
+                          <span key={tag} className="tag-pill">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </TerminalWindow>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Projects ── */}
+        <section
+          id="projects"
+          ref={projects.ref}
+          className="py-24 sm:py-32 px-4 sm:px-8"
+        >
+          <div className="max-w-5xl mx-auto">
+            <div className={`mb-12 transition-all duration-700 ease-out ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <SectionLabel>PROJECTS</SectionLabel>
+              <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-white mt-4">
+                Things I&apos;ve built
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {projectCards.map((proj, idx) => (
+                <div
+                  key={proj.title}
+                  className={`transition-all duration-500 ease-out ${projects.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                  style={{ transitionDelay: `${idx * 100}ms` }}
+                >
+                  <TerminalWindow title={proj.filename} className="h-full">
+                    <div className="flex flex-col h-full gap-3">
+                      <div className="flex justify-between items-start gap-3">
+                        <div>
+                          <p className="text-white font-semibold text-base">{proj.title}</p>
+                          {(proj.githubUrl || proj.liveUrl) && (
+                            <div className="flex flex-wrap gap-3 mt-1">
+                              {proj.githubUrl && (
+                                <a
+                                  href={proj.githubUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="portfolio-link text-xs font-mono inline-block"
+                                >
+                                  github ↗
+                                </a>
+                              )}
+                              {proj.liveUrl && (
+                                <a
+                                  href={proj.liveUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="portfolio-link text-xs font-mono inline-block"
+                                >
+                                  live demo ↗
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right shrink-0 ml-2 font-mono">
+                          <span className="text-portfolio-orange text-xs block">{proj.date}</span>
+                          {proj.meta && <span className="text-portfolio-muted text-xs block mt-1">{proj.meta}</span>}
+                        </div>
+                      </div>
+                      <p className="text-portfolio-secondary text-sm leading-relaxed flex-1">
+                        {proj.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2 pt-3 border-t border-portfolio-border">
+                        {proj.tags.map(tag => (
+                          <span
+                            key={tag}
+                            className="tag-pill"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </TerminalWindow>
+                </div>
               ))}
             </div>
           </div>

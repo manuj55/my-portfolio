@@ -8,13 +8,6 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
 });
 
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-serif",
-  style: ["normal", "italic"],
-  weight: ["400", "600"],
-});
-
 export const metadata: Metadata = {
   title: "Manu Janardhana | Full-Stack Developer",
   description:
@@ -28,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${jetbrainsMono.variable} ${newsreader.variable} font-sans bg-portfolio-bg text-white`}>
+      <body className={`${jetbrainsMono.variable} font-sans bg-portfolio-bg text-white`}>
         {children}
         <Analytics />
       </body>
